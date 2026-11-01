@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biblioteca</title>
+<style>
+:root {
+  --bg: #f6f3ee; --panel: #fffdf9; --ink: #2a2622; --muted: #6f675e; --line: #e4ddd2;
+  --accent: #7a4b1f; --accent-soft: #f1e6d8; --chip: #efe9e0; --chip-on: #7a4b1f; --chip-on-ink: #fff;
+  --ok: #2f6b3a; --ok-soft: #e3efe2; --warn: #8a5a00; --warn-soft: #fbf0d6; --bad: #9b2c24; --bad-soft: #f8e1de;
+  --shadow: 0 1px 2px rgba(60,40,20,.06), 0 2px 8px rgba(60,40,20,.05);
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #1b1916; --panel: #24211d; --ink: #ece6dd; --muted: #a59c90; --line: #3a352f;
+    --accent: #e0a868; --accent-soft: #3a2e22; --chip: #302c27; --chip-on: #e0a868; --chip-on-ink: #1b1916;
+    --ok: #8fd19e; --ok-soft: #1f3324; --warn: #f0c060; --warn-soft: #3a3020; --bad: #f19a90; --bad-soft: #3d2220; --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1b1916; --panel: #24211d; --ink: #ece6dd; --muted: #a59c90; --line: #3a352f;
+  --accent: #e0a868; --accent-soft: #3a2e22; --chip: #302c27; --chip-on: #e0a868; --chip-on-ink: #1b1916;
+  --ok: #8fd19e; --ok-soft: #1f3324; --warn: #f0c060; --warn-soft: #3a3020; --bad: #f19a90; --bad-soft: #3d2220; --shadow: none;
+}
+:root[data-theme="sepia"] {
+  --bg: #f1e7d0; --panel: #f8f0dc; --ink: #3b2f1e; --muted: #7a6a52; --line: #dccdaa;
+  --accent: #8a4b14; --accent-soft: #ead9b6; --chip: #e8dbbd; --chip-on: #8a4b14; --chip-on-ink: #fff8ea; --shadow: none;
+}
+:root[data-theme="contrast"] {
+  --bg: #000; --panel: #0a0a0a; --ink: #fff; --muted: #d6d6d6; --line: #8a8a8a;
+  --accent: #ffd400; --accent-soft: #2b2400; --chip: #1c1c1c; --chip-on: #ffd400; --chip-on-ink: #000;
+  --ok: #7dff9a; --ok-soft: #002b0b; --warn: #ffd400; --warn-soft: #2b2400; --bad: #ff8a80; --bad-soft: #300; --shadow: none;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 14.5px/1.5 var(--sans); }
+button, input, select, textarea { font: inherit; color: inherit; }
+header { display: flex; align-items: center; gap: 16px; padding: 10px 18px; border-bottom: 1px solid var(--line); background: var(--panel); }
+header h1 { margin: 0; font: 600 21px var(--serif); color: var(--accent); }
+header .sp { flex: 1; }
+.langs button { border: 1px solid var(--line); background: var(--chip); padding: 3px 9px; border-radius: 6px; cursor: pointer; }
+.langs button.on { background: var(--chip-on); color: var(--chip-on-ink); border-color: var(--chip-on); }
+main { display: grid; grid-template-columns: 236px 1fr; height: calc(100% - 55px - 52px); }
+nav { border-right: 1px solid var(--line); padding: 12px 8px; overflow: auto; background: var(--panel); }
+nav a { display: flex; gap: 9px; align-items: center; padding: 8px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; cursor: pointer; }
+nav a .num { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; background: var(--chip); flex: none; }
+nav a.done .num { background: var(--ok-soft); color: var(--ok); }
+nav a.on { background: var(--accent-soft); font-weight: 600; }
+nav a.on .num { background: var(--accent); color: var(--chip-on-ink); }
+nav hr { border: 0; border-top: 1px solid var(--line); margin: 10px 4px; }
+#vista { overflow: auto; padding: 22px 28px 40px; }
+section { display: none; max-width: 1180px; }
+section#s-proposte { max-width: none; }
+section.on { display: block; }
+h2 { font: 600 24px var(--serif); margin: 0 0 6px; }
+h3 { font: 600 17px var(--serif); margin: 22px 0 8px; }
+.intro { color: var(--muted); margin: 0 0 18px; max-width: 820px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow); margin-bottom: 14px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-weight: 600; margin-bottom: 4px; }
+.field .hint { color: var(--muted); font-size: 13px; margin-top: 3px; }
+input[type=text], input[type=number], select, textarea { background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 6px 9px; }
+input[type=text] { min-width: 0; }
+.path { flex: 1; min-width: 280px; }
+.btn { border: 1px solid var(--line); background: var(--chip); padding: 7px 14px; border-radius: 8px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.pri { background: var(--accent); color: var(--chip-on-ink); border-color: var(--accent); font-weight: 600; }
+.btn.bad { background: var(--bad); color: #fff; border-color: var(--bad); font-weight: 600; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.small { padding: 3px 9px; font-size: 13px; }
+.list { list-style: none; margin: 6px 0; padding: 0; }
+.list li { display: flex; gap: 8px; align-items: center; padding: 4px 0; }
+.list li code { flex: 1; background: var(--bg); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line); word-break: break-all; }
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin: 10px 0; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+.stat b { display: block; font: 600 24px var(--serif); }
+.stat span { color: var(--muted); font-size: 13px; }
+.msg { padding: 10px 14px; border-radius: 9px; margin: 10px 0; }
+.msg.ok { background: var(--ok-soft); color: var(--ok); }
+.msg.warn { background: var(--warn-soft); color: var(--warn); }
+.msg.bad { background: var(--bad-soft); color: var(--bad); }
+.msg ul { margin: 6px 0 0; padding-left: 20px; }
+table { border-collapse: collapse; width: 100%; background: var(--panel); }
+th, td { border-bottom: 1px solid var(--line); padding: 5px 7px; text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--panel); font-size: 12.5px; color: var(--muted); z-index: 1; }
+td input[type=text] { width: 100%; padding: 3px 6px; }
+td select { max-width: 190px; padding: 3px 4px; }
+tr.sel td { background: var(--accent-soft); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.chip { border: 1px solid var(--line); background: var(--chip); padding: 3px 11px; border-radius: 999px; cursor: pointer; font-size: 13px; }
+.chip.on { background: var(--chip-on); color: var(--chip-on-ink); border-color: var(--chip-on); }
+.flag { display: inline-block; font-size: 11.5px; padding: 0 6px; border-radius: 5px; background: var(--warn-soft); color: var(--warn); margin: 1px 2px 0 0; }
+.conf { font-size: 11.5px; color: var(--muted); }
+.conf.low { color: var(--bad); font-weight: 600; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; align-items: start; }
+@media (max-width: 1150px) { .split { grid-template-columns: minmax(0, 1fr); } #det { position: static; max-height: none; } }
+.split.nodet { grid-template-columns: minmax(0, 1fr); } .split.nodet #det { display: none; }
+#det .chiudi { float: right; }
+#tab select[data-f=decisione] { max-width: 140px; } #tab select[data-f=categoria] { max-width: 175px; }
+#det { position: sticky; top: 0; max-height: calc(100vh - 150px); overflow: auto; }
+#det img { max-width: 100%; border: 1px solid var(--line); border-radius: 6px; }
+#det pre { white-space: pre-wrap; font: 12.5px/1.45 var(--sans); background: var(--bg); padding: 8px; border-radius: 6px; max-height: 260px; overflow: auto; }
+.svc { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.svc label { display: block; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; cursor: pointer; background: var(--panel); }
+.svc label.on { border-color: var(--accent); background: var(--accent-soft); }
+.svc input { margin-right: 6px; }
+.svc small { display: block; color: var(--muted); margin-top: 3px; }
+ol.steps { padding-left: 20px; } ol.steps li { margin: 7px 0; }
+footer { height: 52px; border-top: 1px solid var(--line); background: var(--panel); display: flex; align-items: center; gap: 12px; padding: 0 18px; }
+#bar { flex: 1; height: 10px; background: var(--chip); border-radius: 6px; overflow: hidden; }
+#bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+#jobtxt { min-width: 260px; max-width: 46%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+.pager { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+.small { font-size: 12.5px; color: var(--muted); }
+details summary { cursor: pointer; font-weight: 600; }
+.guide p, .guide li { max-width: 820px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📚 Biblioteca</h1>
+  <span class="small" id="ver"></span>
+  <span class="sp"></span>
+  <span class="langs"><button data-l="it">IT</button> <button data-l="en">EN</button> <button data-l="es">ES</button></span>
+</header>
+<main>
+  <nav id="nav"></nav>
+  <div id="vista">
+
+<section id="s-cartelle">
+  <h2 data-t="cartelle"></h2><p class="intro" data-t="cartelleIntro"></p>
+  <div class="card">
+    <div class="field"><label data-t="fBib"></label>
+      <div class="row"><input type="text" class="path" id="fBib" readonly><button class="btn" data-pick="biblioteca" data-t="scegli"></button></div>
+      <div class="hint" data-t="fBibH"></div></div>
+    <div class="field"><label data-t="fSorg"></label><ul class="list" id="lSorg"></ul>
+      <button class="btn" data-add="sorgenti" data-t="aggiungi"></button><div class="hint" data-t="fSorgH"></div></div>
+    <div class="field"><label data-t="fProt"></label><ul class="list" id="lProt"></ul>
+      <button class="btn" data-add="protette" data-t="aggiungi"></button><div class="hint" data-t="fProtH"></div></div>
+    <details><summary data-t="altreCartelle"></summary>
+      <div class="field" style="margin-top:10px"><label data-t="fDup"></label>
+        <div class="row"><input type="text" class="path" id="fDup" readonly><button class="btn" data-pick="duplicati" data-t="scegli"></button></div></div>
+      <div class="field"><label data-t="fAltri"></label>
+        <div class="row"><input type="text" class="path" id="fAltri" readonly><button class="btn" data-pick="altri_file" data-t="scegli"></button></div></div>
+    </details>
+  </div>
+  <div id="mCartelle"></div>
+  <button class="btn pri" data-go="inventario" data-t="avanti"></button>
+</section>
+
+<section id="s-inventario">
+  <h2 data-t="inventario"></h2><p class="intro" data-t="inventarioIntro"></p>
+  <div class="row"><button class="btn pri" id="bInv" data-t="avviaInv"></button><span class="small" data-t="soloLettura"></span></div>
+  <div id="rInv"></div>
+</section>
+
+<section id="s-duplicati">
+  <h2 data-t="duplicati"></h2><p class="intro" data-t="duplicatiIntro"></p>
+  <div id="rDup"></div>
+</section>
+
+<section id="s-ai">
+  <h2 data-t="ai"></h2><p class="intro" data-t="aiIntro"></p>
+  <div class="svc" id="svc"></div>
+  <div class="card" id="aiGuida" style="margin-top:14px"></div>
+  <div class="card" id="aiAvvio"></div>
+</section>
+
+<section id="s-proposte">
+  <h2 data-t="proposte"></h2><p class="intro" data-t="proposteIntro"></p>
+  <div class="row">
+    <div class="chips" id="filtri"></div><span class="sp" style="flex:1"></span>
+    <input type="text" id="cerca" style="width:220px">
+  </div>
+  <div class="row small" id="bulk"></div>
+  <p class="small" data-t="scegliRiga"></p>
+  <div class="split nodet">
+    <div><div class="pager" id="pag1"></div><div style="overflow:auto"><table id="tab"></table></div><div class="pager" id="pag2"></div></div>
+    <div class="card" id="det"></div>
+  </div>
+</section>
+
+<section id="s-simula">
+  <h2 data-t="simula"></h2><p class="intro" data-t="simulaIntro"></p>
+  <div class="row"><button class="btn" id="bPiano" data-t="costruisci"></button><button class="btn pri" id="bSim" data-t="avviaSim"></button></div>
+  <div id="rPiano"></div><div id="rSim"></div>
+</section>
+
+<section id="s-esegui">
+  <h2 data-t="esegui"></h2><p class="intro" data-t="eseguiIntro"></p>
+  <div class="card"><label><input type="checkbox" id="approvo"> <span data-t="approvo"></span></label></div>
+  <button class="btn bad" id="bEse" data-t="avviaEse"></button>
+  <div id="rEse"></div>
+</section>
+
+<section id="s-catalogo">
+  <h2 data-t="catalogo"></h2><p class="intro" data-t="catalogoIntro"></p>
+  <div class="card"><h3 data-t="catTit"></h3><div class="row"><button class="btn pri" id="bCat" data-t="aggCat"></button><button class="btn" id="bApriCat" data-t="apriCat"></button></div><div id="rCat"></div></div>
+  <div class="card"><h3 data-t="xlTit"></h3><div class="row"><button class="btn" id="bXl" data-t="creaXl"></button><button class="btn" id="bDec" data-t="creaDec"></button></div><div id="rXl"></div></div>
+</section>
+
+<section id="s-annulla">
+  <h2 data-t="annulla"></h2><p class="intro" data-t="annullaIntro"></p>
+  <div id="rLog"></div><div id="rAnn"></div>
+</section>
+
+<section id="s-impostazioni">
+  <h2 data-t="impostazioni"></h2>
+  <div class="card"><div class="row">
+    <div class="field"><label data-t="tema"></label><select id="tema"></select></div>
+    <div class="field"><label data-t="soglia"></label><input type="number" id="soglia" min="0.3" max="0.99" step="0.05" style="width:90px"><div class="hint" data-t="sogliaH"></div></div>
+  </div></div>
+  <div class="card"><h3 data-t="categorie"></h3><p class="small" data-t="categorieH"></p>
+    <table id="tCat"></table><div class="row" style="margin-top:8px"><button class="btn" id="bCatAdd" data-t="aggiungi"></button><button class="btn pri" id="bCatSalva" data-t="salva"></button></div></div>
+  <div class="card"><h3 data-t="esclusioni"></h3><p class="small" data-t="esclusioniH"></p>
+    <ul class="list" id="lEsc"></ul><div class="row"><input type="text" id="nuovaEsc"><button class="btn" id="bEscAdd" data-t="aggiungi"></button></div></div>
+</section>
+
+<section id="s-guida" class="guide">
+  <h2 data-t="guida"></h2><p><button class="btn pri" id="bManuale" data-t="manuale"></button></p><div id="guidaTesto"></div>
+</section>
+
+  </div>
+</main>
+<footer><span id="jobtxt"></span><div id="bar"><i></i></div><button class="btn small" id="bStop" data-t="interrompi" disabled></button></footer>
+
+<script>
+"use strict";
+const T = {
+ it: {
+  cartelle:"Cartelle", inventario:"Inventario", duplicati:"Duplicati", ai:"Titoli con l'AI", proposte:"Proposte", simula:"Simulazione",
+  esegui:"Esecuzione e verifica", catalogo:"Catalogo ed Excel", annulla:"Annulla un'esecuzione", impostazioni:"Impostazioni", guida:"Guida",
+  facoltativo:"facoltativo",
+  cartelleIntro:"Scegli dove si trova la Biblioteca ordinata e quali cartelle vanno ordinate. Per aggiungere libri nuovi, metti la cartella dei libri nuovi tra quelle da ordinare.",
+  fBib:"Biblioteca (destinazione)", fBibH:"Qui il programma crea le categorie e le collezioni. Può essere vuota.",
+  fSorg:"Cartelle da ordinare", fSorgH:"Il programma legge tutto quello che c'è dentro, sottocartelle comprese.",
+  fProt:"Cartelle protette", fProtH:"Il programma non le legge, non ci scrive e non sposta niente da lì (per esempio i backup).",
+  altreCartelle:"Dove vanno copie identiche e file che non sono libri", fDup:"Copie identiche", fAltri:"File che non sono libri",
+  scegli:"Scegli…", aggiungi:"Aggiungi", togli:"Togli", salva:"Salva", avanti:"Avanti →", nessuna:"(nessuna)",
+  predef:"predefinita: ", inventarioIntro:"Il programma legge ogni file: impronta SHA-256, pagine, testo delle prime pagine, ISBN, edizione e prologo. Poi prepara le proposte. Si può interrompere e riprendere: i file già letti non si rileggono.",
+  avviaInv:"Avvia l'inventario", soloLettura:"Sola lettura: nessun file viene spostato.", interrompi:"Interrompi",
+  rifaInv:"Rifare l'inventario ricalcola le proposte: le correzioni fatte a mano andranno perse. Continuare?",
+  invFatto:"Inventario fatto", file:"file", libri:"libri", apriXl:"Apri l'Excel", modelloBase:"Categorie proposte con il modello di base (la Biblioteca è ancora piccola).",
+  modelloBib:"Categorie imparate dalla tua Biblioteca.",
+  duplicatiIntro:"Le copie identiche (stesso file) vanno in una cartella a parte, mai cancellate. I probabili doppioni sono solo segnalati: decidi tu.",
+  dIMPORTA:"Da importare", dGIA_IN_BIBLIOTECA:"Già in Biblioteca", dDUPLICATO:"Copie identiche", dDOPPIONE_PROBABILE:"Probabili doppioni",
+  dNON_IMPORTARE:"Non importare", dALTRI_FILE:"Non sono libri", simili:"Simili in Biblioteca",
+  aiIntro:"Facoltativo. L'AI legge la prima pagina dei libri e propone titolo, sottotitolo e autore: nella prova ha fatto molto meglio del programma da solo (78–82% di titoli giusti contro 28%). Le correzioni a mano restano sempre possibili.",
+  sNessuno:"Nessuna AI", sNessunoD:"Solo le proposte del programma.",
+  sLocale:"AI sul PC", sLocaleD:"Gratis, senza account e senza internet. Più lenta.",
+  sGemini:"Google Gemini", sGeminiD:"Gratis con un account Google, senza carta. Il più preciso.",
+  sGroq:"Groq", sGroqD:"Gratis con un account, senza carta.",
+  sClaude:"Claude", sClaudeD:"A pagamento, con la tua chiave.",
+  ram:"Memoria del PC", consigliato:"Modello consigliato", scaricato:"scaricato", nonScaricato:"non scaricato",
+  scarica:"Scarica", daFile:"Carica da un file (chiavetta USB)", prova:"Prova", provaOk:"Funziona", provaNo:"Non funziona",
+  motoreNo:"Il motore dell'AI non è installato con il programma.",
+  locale1:"Il modello si scarica una volta sola (circa 1–3 GB). Se internet è lento o costoso, puoi copiarlo da un altro PC con una chiavetta e usare «Carica da un file».",
+  locale2:"Dopo, funziona senza internet: i libri non escono dal PC.",
+  apriPagina:"Apri la pagina", incolla:"Incolla qui la chiave (anche con il testo intorno: il programma la trova da solo)",
+  salvaChiave:"Salva la chiave", chiaveSalvata:"Chiave salvata", togliChiave:"Dimentica la chiave", chiaveNo:"Nessuna chiave trovata nel testo incollato.",
+  gem1:"Premi «Apri la pagina»: si apre il sito di Google AI Studio.", gem2:"Entra con il tuo account Google (Gmail o telefono Android).",
+  gem3:"La prima volta Google mostra le condizioni d'uso: leggile e accettale tu.", gem4:"Premi «Create API key» (Crea chiave API). Se chiede un progetto, scegli quello proposto.",
+  gem5:"Copia la chiave (comincia con AQ. oppure AIza) e incollala qui sotto, poi premi «Salva la chiave» e «Prova».",
+  gemPriv:"Nel livello gratuito Google può usare i testi inviati per migliorare i suoi servizi. Si mandano solo il nome del file e le prime pagine, mai il libro intero. C'è un limite al giorno: quando finisce, il programma si ferma e riprendi il giorno dopo da dove eri.",
+  groq1:"Premi «Apri la pagina» ed entra con un account Google o con l'email.", groq2:"Premi «Create API Key», scrivi un nome qualsiasi (per esempio Biblioteca) e copia la chiave (comincia con gsk_).",
+  cl1:"Premi «Apri la pagina» ed entra nella Console di Anthropic (serve un account).", cl2:"In «Billing» aggiungi un piccolo credito: si paga solo quello che si usa.",
+  cl3:"In «API keys» premi «Create Key» e copia la chiave (comincia con sk-ant-).", clModello:"Modello",
+  chiaveSicura:"La chiave si salva cifrata con Windows: solo il tuo utente su questo PC può leggerla. Non condividerla.",
+  aiDaFare:"Libri da importare ancora senza AI", aiStima:"Tempo stimato", aiCosto:"Costo stimato", minuti:"minuti",
+  aiAvvia:"Avvia l'AI sui titoli", aiFatto:"AI fatta", aiRestano:"restano", aiPrima:"Prima fai l'inventario.",
+  proposteIntro:"Controlla e correggi. In alto i casi incerti. Le categorie sicure (sicurezza alta) sono già accettate. Ogni modifica si salva da sola.",
+  fTutti:"Tutti", fControllare:"Da controllare", fImporta:"Da importare", fDoppioni:"Doppioni", fEsclusi:"Esclusi",
+  cerca:"Cerca…", cN:"N", cFile:"File", cDec:"Decisione", cCat:"Categoria", cColl:"Collezione", cVol:"Vol.", cTit:"Titolo",
+  cSub:"Sottotitolo", cAut:"Autore", cNota:"Note", pagina:"pagina", di:"di", prec:"‹ Prec.", succ:"Succ. ›",
+  selezionati:"selezionati", applicaA:"Applica ai selezionati:", numera:"Numera la collezione", numerati:"volumi numerati",
+  apriLibro:"Apri il libro", nessunaProposta:"Prima fai l'inventario.", scegliRiga:"Clicca una riga per vedere la copertina e le prime pagine.",
+  motivo:"Motivo", fonte:"Titolo da", fManuale:"te", fAi:"AI", fNome:"nome del file", fMeta:"metadati", fFront:"frontespizio",
+  simulaIntro:"Il piano elenca ogni spostamento. La simulazione controlla tutto senza toccare niente: file esistente e uguale, destinazione libera, percorsi non troppo lunghi, cartelle protette.",
+  costruisci:"Costruisci il piano", avviaSim:"Avvia la simulazione", errori:"Errori da correggere nelle Proposte", avvisi:"Avvisi",
+  operazioni:"operazioni", simOk:"Simulazione senza problemi: puoi passare all'esecuzione.", simNo:"La simulazione ha trovato problemi:",
+  apriPiano:"Apri il piano in Excel", prima:"Prima", dopo:"Dopo",
+  eseguiIntro:"Sposta e rinomina i file come nel piano. Non cancella mai niente e non sovrascrive mai. Ogni spostamento va nel log, che serve per annullare.",
+  approvo:"Ho controllato il piano e lo approvo.", avviaEse:"Esegui il piano", confEse:"Spostare davvero i file come nel piano?",
+  serveSim:"Prima fai la simulazione senza problemi e spunta l'approvazione.", spostati:"file spostati", verOk:"Verifica: tutti i file sono al loro posto, con la stessa impronta.",
+  verNo:"Verifica: problemi trovati", dopoEse:"Ora aggiorna il catalogo.",
+  catalogoIntro:"Il catalogo è una pagina web che funziona senza internet: ricerca, temi, ISBN con codice a barre, prologo, la mia sezione, tre lingue.",
+  catTit:"Catalogo.html", aggCat:"Aggiorna il catalogo", apriCat:"Apri il catalogo", xlTit:"Excel",
+  creaXl:"Elenco dei libri con ISBN e codici a barre", creaDec:"Riepilogo delle cose da decidere", conProl:"con prologo", conIsbn:"con ISBN", conEd:"con edizione",
+  annullaIntro:"Rimette ogni file al posto di prima, in ordine inverso. Prima si prova, poi si annulla davvero. Non sovrascrive: se il posto di prima è occupato, quel file viene saltato.",
+  nessunLog:"Nessuna esecuzione da annullare.", provaAnn:"Prova", annDavvero:"Annulla davvero", giaAnn:"già annullata", confAnn:"Rimettere davvero i file al posto di prima?",
+  ripristinati:"ripristinati", saltati:"saltati", daRipristinare:"si possono rimettere a posto",
+  tema:"Aspetto", tAuto:"Automatico", tLight:"Chiaro", tDark:"Scuro", tSepia:"Seppia", tContrast:"Alto contrasto",
+  soglia:"Sicurezza per accettare da sola la categoria", sogliaH:"0,7 = nella prova 98,7% di categorie giuste.",
+  categorie:"Categorie", categorieH:"Nome della cartella, prefisso nel nome del file e descrizione.", cNome:"Cartella", cPref:"Prefisso", cDescr:"Descrizione",
+  esclusioni:"Motivi di esclusione", esclusioniH:"Motivi tra cui scegliere quando decidi di non importare un libro.",
+  occupato:"C'è già un lavoro in corso.", interrotto:"Interrotto: puoi riprendere quando vuoi.", erroreL:"Errore", fatto:"Fatto",
+  fasi:{biblioteca:"Lettura della Biblioteca", inventario:"Lettura dei file", proposte:"Proposte", simulazione:"Simulazione", esecuzione:"Esecuzione",
+        verifica:"Verifica", annulla:"Annullamento", lettura:"Lettura della Biblioteca", codici:"Codici a barre", AI:"AI", MB:"Scaricamento (MB)", "avvio AI":"Avvio dell'AI"},
+  flags:{"categoria incerta":"categoria incerta","probabile doppione":"probabile doppione","titolo simile in Biblioteca":"titolo simile",
+         "autore mancante":"senza autore","senza testo":"senza testo","da controllare":"da controllare"},
+  errCartelle:"Mancano delle cartelle: scegli la Biblioteca e almeno una cartella da ordinare.",
+  manuale:"Apri il manuale completo",
+ },
+ en: {
+  cartelle:"Folders", inventario:"Inventory", duplicati:"Duplicates", ai:"Titles with AI", proposte:"Proposals", simula:"Simulation",
+  esegui:"Run and verify", catalogo:"Catalog and Excel", annulla:"Undo a run", impostazioni:"Settings", guida:"Guide", facoltativo:"optional",
+  cartelleIntro:"Choose where the organized Library is and which folders must be organized. To add new books, put the new-books folder among the folders to organize.",
+  fBib:"Library (destination)", fBibH:"The program creates categories and collections here. It can be empty.",
+  fSorg:"Folders to organize", fSorgH:"The program reads everything inside, subfolders included.",
+  fProt:"Protected folders", fProtH:"The program never reads, writes or moves anything there (for example backups).",
+  altreCartelle:"Where identical copies and non-book files go", fDup:"Identical copies", fAltri:"Files that are not books",
+  scegli:"Choose…", aggiungi:"Add", togli:"Remove", salva:"Save", avanti:"Next →", nessuna:"(none)", predef:"default: ",
+  inventarioIntro:"The program reads every file: SHA-256 fingerprint, pages, text of the first pages, ISBN, edition and prologue. Then it prepares the proposals. You can stop and resume: files already read are not read again.",
+  avviaInv:"Start the inventory", soloLettura:"Read only: no file is moved.", interrompi:"Stop",
+  rifaInv:"Redoing the inventory recalculates the proposals: manual corrections will be lost. Continue?",
+  invFatto:"Inventory done", file:"files", libri:"books", apriXl:"Open the Excel file", modelloBase:"Categories proposed with the base model (the Library is still small).",
+  modelloBib:"Categories learned from your Library.",
+  duplicatiIntro:"Identical copies (same file) go to a separate folder, never deleted. Probable duplicates are only flagged: you decide.",
+  dIMPORTA:"To import", dGIA_IN_BIBLIOTECA:"Already in Library", dDUPLICATO:"Identical copies", dDOPPIONE_PROBABILE:"Probable duplicates",
+  dNON_IMPORTARE:"Do not import", dALTRI_FILE:"Not books", simili:"Similar in Library",
+  aiIntro:"Optional. The AI reads the first page of the books and proposes title, subtitle and author: in our test it did much better than the program alone (78–82% correct titles vs 28%). Manual corrections are always possible.",
+  sNessuno:"No AI", sNessunoD:"Only the program's proposals.", sLocale:"AI on this PC", sLocaleD:"Free, no account, no internet. Slower.",
+  sGemini:"Google Gemini", sGeminiD:"Free with a Google account, no card. The most accurate.", sGroq:"Groq", sGroqD:"Free with an account, no card.",
+  sClaude:"Claude", sClaudeD:"Paid, with your own key.",
+  ram:"PC memory", consigliato:"Recommended model", scaricato:"downloaded", nonScaricato:"not downloaded",
+  scarica:"Download", daFile:"Load from a file (USB stick)", prova:"Test", provaOk:"It works", provaNo:"It does not work",
+  motoreNo:"The AI engine is not installed with the program.",
+  locale1:"The model is downloaded only once (about 1–3 GB). If internet is slow or expensive, copy it from another PC with a USB stick and use “Load from a file”.",
+  locale2:"Afterwards it works without internet: the books never leave the PC.",
+  apriPagina:"Open the page", incolla:"Paste the key here (even with surrounding text: the program finds it)",
+  salvaChiave:"Save the key", chiaveSalvata:"Key saved", togliChiave:"Forget the key", chiaveNo:"No key found in the pasted text.",
+  gem1:"Press “Open the page”: the Google AI Studio site opens.", gem2:"Sign in with your Google account (Gmail or Android phone).",
+  gem3:"The first time Google shows its terms of use: read and accept them yourself.", gem4:"Press “Create API key”. If it asks for a project, choose the proposed one.",
+  gem5:"Copy the key (it starts with AQ. or AIza), paste it below, then press “Save the key” and “Test”.",
+  gemPriv:"On the free tier Google may use the texts sent to improve its services. Only the file name and the first pages are sent, never the whole book. There is a daily limit: when it runs out, the program stops and you resume the next day where you left off.",
+  groq1:"Press “Open the page” and sign in with a Google account or email.", groq2:"Press “Create API Key”, type any name (for example Library) and copy the key (it starts with gsk_).",
+  cl1:"Press “Open the page” and sign in to the Anthropic Console (an account is needed).", cl2:"In “Billing” add a small credit: you only pay for what you use.",
+  cl3:"In “API keys” press “Create Key” and copy the key (it starts with sk-ant-).", clModello:"Model",
+  chiaveSicura:"The key is stored encrypted by Windows: only your user on this PC can read it. Do not share it.",
+  aiDaFare:"Books to import not yet seen by the AI", aiStima:"Estimated time", aiCosto:"Estimated cost", minuti:"minutes",
+  aiAvvia:"Run the AI on titles", aiFatto:"AI done", aiRestano:"remaining", aiPrima:"Do the inventory first.",
+  proposteIntro:"Check and correct. Uncertain cases are on top. Safe categories (high confidence) are already accepted. Every change is saved automatically.",
+  fTutti:"All", fControllare:"To check", fImporta:"To import", fDoppioni:"Duplicates", fEsclusi:"Excluded",
+  cerca:"Search…", cN:"No.", cFile:"File", cDec:"Decision", cCat:"Category", cColl:"Collection", cVol:"Vol.", cTit:"Title",
+  cSub:"Subtitle", cAut:"Author", cNota:"Notes", pagina:"page", di:"of", prec:"‹ Prev", succ:"Next ›",
+  selezionati:"selected", applicaA:"Apply to selected:", numera:"Number the collection", numerati:"volumes numbered",
+  apriLibro:"Open the book", nessunaProposta:"Do the inventory first.", scegliRiga:"Click a row to see the cover and the first pages.",
+  motivo:"Reason", fonte:"Title from", fManuale:"you", fAi:"AI", fNome:"file name", fMeta:"metadata", fFront:"title page",
+  simulaIntro:"The plan lists every move. The simulation checks everything without touching anything: file present and unchanged, free destination, paths not too long, protected folders.",
+  costruisci:"Build the plan", avviaSim:"Start the simulation", errori:"Errors to fix in Proposals", avvisi:"Warnings",
+  operazioni:"operations", simOk:"Simulation without problems: you can go on to the run.", simNo:"The simulation found problems:",
+  apriPiano:"Open the plan in Excel", prima:"Before", dopo:"After",
+  eseguiIntro:"Moves and renames the files as in the plan. It never deletes and never overwrites anything. Every move goes into the log, which is used to undo.",
+  approvo:"I have checked the plan and I approve it.", avviaEse:"Run the plan", confEse:"Really move the files as in the plan?",
+  serveSim:"First run the simulation without problems and tick the approval.", spostati:"files moved", verOk:"Verification: all files are in place, with the same fingerprint.",
+  verNo:"Verification: problems found", dopoEse:"Now update the catalog.",
+  catalogoIntro:"The catalog is a web page that works without internet: search, themes, ISBN with barcode, prologue, my section, three languages.",
+  catTit:"Catalogo.html", aggCat:"Update the catalog", apriCat:"Open the catalog", xlTit:"Excel",
+  creaXl:"Book list with ISBN and barcodes", creaDec:"Summary of things to decide", conProl:"with prologue", conIsbn:"with ISBN", conEd:"with edition",
+  annullaIntro:"Puts every file back where it was, in reverse order. First test, then undo for real. It never overwrites: if the old place is taken, that file is skipped.",
+  nessunLog:"No run to undo.", provaAnn:"Test", annDavvero:"Undo for real", giaAnn:"already undone", confAnn:"Really put the files back where they were?",
+  ripristinati:"restored", saltati:"skipped", daRipristinare:"can be put back",
+  tema:"Appearance", tAuto:"Automatic", tLight:"Light", tDark:"Dark", tSepia:"Sepia", tContrast:"High contrast",
+  soglia:"Confidence to accept the category automatically", sogliaH:"0.7 = 98.7% correct categories in our test.",
+  categorie:"Categories", categorieH:"Folder name, prefix in the file name and description.", cNome:"Folder", cPref:"Prefix", cDescr:"Description",
+  esclusioni:"Exclusion reasons", esclusioniH:"Reasons to choose from when you decide not to import a book.",
+  occupato:"A job is already running.", interrotto:"Stopped: you can resume whenever you want.", erroreL:"Error", fatto:"Done",
+  fasi:{biblioteca:"Reading the Library", inventario:"Reading the files", proposte:"Proposals", simulazione:"Simulation", esecuzione:"Running",
+        verifica:"Verification", annulla:"Undoing", lettura:"Reading the Library", codici:"Barcodes", AI:"AI", MB:"Downloading (MB)", "avvio AI":"Starting the AI"},
+  flags:{"categoria incerta":"uncertain category","probabile doppione":"probable duplicate","titolo simile in Biblioteca":"similar title",
+         "autore mancante":"no author","senza testo":"no text","da controllare":"to check"},
+  errCartelle:"Folders missing: choose the Library and at least one folder to organize.",
+  manuale:"Open the full manual",
+ },
+ es: {
+  cartelle:"Carpetas", inventario:"Inventario", duplicati:"Duplicados", ai:"Títulos con IA", proposte:"Propuestas", simula:"Simulación",
+  esegui:"Ejecución y verificación", catalogo:"Catálogo y Excel", annulla:"Deshacer una ejecución", impostazioni:"Ajustes", guida:"Guía", facoltativo:"opcional",
+  cartelleIntro:"Elige dónde está la Biblioteca ordenada y qué carpetas hay que ordenar. Para añadir libros nuevos, pon la carpeta de libros nuevos entre las que hay que ordenar.",
+  fBib:"Biblioteca (destino)", fBibH:"Aquí el programa crea las categorías y las colecciones. Puede estar vacía.",
+  fSorg:"Carpetas para ordenar", fSorgH:"El programa lee todo lo que hay dentro, subcarpetas incluidas.",
+  fProt:"Carpetas protegidas", fProtH:"El programa no las lee, no escribe en ellas y no mueve nada de allí (por ejemplo las copias de seguridad).",
+  altreCartelle:"Dónde van las copias idénticas y los archivos que no son libros", fDup:"Copias idénticas", fAltri:"Archivos que no son libros",
+  scegli:"Elegir…", aggiungi:"Añadir", togli:"Quitar", salva:"Guardar", avanti:"Siguiente →", nessuna:"(ninguna)", predef:"predeterminada: ",
+  inventarioIntro:"El programa lee cada archivo: huella SHA-256, páginas, texto de las primeras páginas, ISBN, edición y prólogo. Luego prepara las propuestas. Se puede interrumpir y reanudar: los archivos ya leídos no se vuelven a leer.",
+  avviaInv:"Iniciar el inventario", soloLettura:"Solo lectura: no se mueve ningún archivo.", interrompi:"Interrumpir",
+  rifaInv:"Rehacer el inventario recalcula las propuestas: se perderán las correcciones manuales. ¿Continuar?",
+  invFatto:"Inventario hecho", file:"archivos", libri:"libros", apriXl:"Abrir el Excel", modelloBase:"Categorías propuestas con el modelo básico (la Biblioteca todavía es pequeña).",
+  modelloBib:"Categorías aprendidas de tu Biblioteca.",
+  duplicatiIntro:"Las copias idénticas (mismo archivo) van a una carpeta aparte, nunca se borran. Los probables duplicados solo se señalan: decides tú.",
+  dIMPORTA:"Para importar", dGIA_IN_BIBLIOTECA:"Ya en la Biblioteca", dDUPLICATO:"Copias idénticas", dDOPPIONE_PROBABILE:"Probables duplicados",
+  dNON_IMPORTARE:"No importar", dALTRI_FILE:"No son libros", simili:"Parecidos en la Biblioteca",
+  aiIntro:"Opcional. La IA lee la primera página de los libros y propone título, subtítulo y autor: en la prueba lo hizo mucho mejor que el programa solo (78–82% de títulos correctos frente a 28%). Las correcciones manuales siempre son posibles.",
+  sNessuno:"Sin IA", sNessunoD:"Solo las propuestas del programa.", sLocale:"IA en el PC", sLocaleD:"Gratis, sin cuenta y sin internet. Más lenta.",
+  sGemini:"Google Gemini", sGeminiD:"Gratis con una cuenta de Google, sin tarjeta. La más precisa.", sGroq:"Groq", sGroqD:"Gratis con una cuenta, sin tarjeta.",
+  sClaude:"Claude", sClaudeD:"De pago, con tu propia clave.",
+  ram:"Memoria del PC", consigliato:"Modelo recomendado", scaricato:"descargado", nonScaricato:"no descargado",
+  scarica:"Descargar", daFile:"Cargar desde un archivo (memoria USB)", prova:"Probar", provaOk:"Funciona", provaNo:"No funciona",
+  motoreNo:"El motor de la IA no está instalado con el programa.",
+  locale1:"El modelo se descarga una sola vez (unos 1–3 GB). Si internet es lento o caro, cópialo de otro PC con una memoria USB y usa «Cargar desde un archivo».",
+  locale2:"Después funciona sin internet: los libros no salen del PC.",
+  apriPagina:"Abrir la página", incolla:"Pega aquí la clave (aunque tenga texto alrededor: el programa la encuentra)",
+  salvaChiave:"Guardar la clave", chiaveSalvata:"Clave guardada", togliChiave:"Olvidar la clave", chiaveNo:"No se encontró ninguna clave en el texto pegado.",
+  gem1:"Pulsa «Abrir la página»: se abre el sitio de Google AI Studio.", gem2:"Entra con tu cuenta de Google (Gmail o teléfono Android).",
+  gem3:"La primera vez Google muestra las condiciones de uso: léelas y acéptalas tú.", gem4:"Pulsa «Create API key» (Crear clave de API). Si pide un proyecto, elige el propuesto.",
+  gem5:"Copia la clave (empieza por AQ. o AIza), pégala aquí abajo y pulsa «Guardar la clave» y «Probar».",
+  gemPriv:"En el nivel gratuito Google puede usar los textos enviados para mejorar sus servicios. Solo se envían el nombre del archivo y las primeras páginas, nunca el libro entero. Hay un límite diario: cuando se acaba, el programa se detiene y sigues al día siguiente donde lo dejaste.",
+  groq1:"Pulsa «Abrir la página» y entra con una cuenta de Google o con el correo.", groq2:"Pulsa «Create API Key», escribe un nombre cualquiera (por ejemplo Biblioteca) y copia la clave (empieza por gsk_).",
+  cl1:"Pulsa «Abrir la página» y entra en la Consola de Anthropic (hace falta una cuenta).", cl2:"En «Billing» añade un pequeño crédito: solo se paga lo que se usa.",
+  cl3:"En «API keys» pulsa «Create Key» y copia la clave (empieza por sk-ant-).", clModello:"Modelo",
+  chiaveSicura:"La clave se guarda cifrada por Windows: solo tu usuario en este PC puede leerla. No la compartas.",
+  aiDaFare:"Libros para importar aún sin IA", aiStima:"Tiempo estimado", aiCosto:"Coste estimado", minuti:"minutos",
+  aiAvvia:"Iniciar la IA en los títulos", aiFatto:"IA hecha", aiRestano:"quedan", aiPrima:"Primero haz el inventario.",
+  proposteIntro:"Revisa y corrige. Arriba los casos dudosos. Las categorías seguras (confianza alta) ya están aceptadas. Cada cambio se guarda solo.",
+  fTutti:"Todos", fControllare:"Para revisar", fImporta:"Para importar", fDoppioni:"Duplicados", fEsclusi:"Excluidos",
+  cerca:"Buscar…", cN:"N.º", cFile:"Archivo", cDec:"Decisión", cCat:"Categoría", cColl:"Colección", cVol:"Vol.", cTit:"Título",
+  cSub:"Subtítulo", cAut:"Autor", cNota:"Notas", pagina:"página", di:"de", prec:"‹ Ant.", succ:"Sig. ›",
+  selezionati:"seleccionados", applicaA:"Aplicar a los seleccionados:", numera:"Numerar la colección", numerati:"volúmenes numerados",
+  apriLibro:"Abrir el libro", nessunaProposta:"Primero haz el inventario.", scegliRiga:"Haz clic en una fila para ver la portada y las primeras páginas.",
+  motivo:"Motivo", fonte:"Título de", fManuale:"ti", fAi:"IA", fNome:"nombre del archivo", fMeta:"metadatos", fFront:"portadilla",
+  simulaIntro:"El plan enumera cada movimiento. La simulación lo comprueba todo sin tocar nada: archivo presente e igual, destino libre, rutas no demasiado largas, carpetas protegidas.",
+  costruisci:"Construir el plan", avviaSim:"Iniciar la simulación", errori:"Errores para corregir en Propuestas", avvisi:"Avisos",
+  operazioni:"operaciones", simOk:"Simulación sin problemas: puedes pasar a la ejecución.", simNo:"La simulación encontró problemas:",
+  apriPiano:"Abrir el plan en Excel", prima:"Antes", dopo:"Después",
+  eseguiIntro:"Mueve y renombra los archivos como en el plan. Nunca borra y nunca sobrescribe nada. Cada movimiento va al registro, que sirve para deshacer.",
+  approvo:"He revisado el plan y lo apruebo.", avviaEse:"Ejecutar el plan", confEse:"¿Mover de verdad los archivos como en el plan?",
+  serveSim:"Primero haz la simulación sin problemas y marca la aprobación.", spostati:"archivos movidos", verOk:"Verificación: todos los archivos están en su sitio, con la misma huella.",
+  verNo:"Verificación: se encontraron problemas", dopoEse:"Ahora actualiza el catálogo.",
+  catalogoIntro:"El catálogo es una página web que funciona sin internet: búsqueda, temas, ISBN con código de barras, prólogo, mi sección, tres idiomas.",
+  catTit:"Catalogo.html", aggCat:"Actualizar el catálogo", apriCat:"Abrir el catálogo", xlTit:"Excel",
+  creaXl:"Lista de libros con ISBN y códigos de barras", creaDec:"Resumen de lo que hay que decidir", conProl:"con prólogo", conIsbn:"con ISBN", conEd:"con edición",
+  annullaIntro:"Devuelve cada archivo a su sitio anterior, en orden inverso. Primero se prueba, luego se deshace de verdad. Nunca sobrescribe: si el sitio anterior está ocupado, ese archivo se salta.",
+  nessunLog:"No hay ejecuciones para deshacer.", provaAnn:"Probar", annDavvero:"Deshacer de verdad", giaAnn:"ya deshecha", confAnn:"¿Devolver de verdad los archivos a su sitio anterior?",
+  ripristinati:"restaurados", saltati:"saltados", daRipristinare:"se pueden devolver a su sitio",
+  tema:"Aspecto", tAuto:"Automático", tLight:"Claro", tDark:"Oscuro", tSepia:"Sepia", tContrast:"Alto contraste",
+  soglia:"Confianza para aceptar sola la categoría", sogliaH:"0,7 = 98,7% de categorías correctas en la prueba.",
+  categorie:"Categorías", categorieH:"Nombre de la carpeta, prefijo en el nombre del archivo y descripción.", cNome:"Carpeta", cPref:"Prefijo", cDescr:"Descripción",
+  esclusioni:"Motivos de exclusión", esclusioniH:"Motivos para elegir cuando decides no importar un libro.",
+  occupato:"Ya hay un trabajo en curso.", interrotto:"Interrumpido: puedes reanudar cuando quieras.", erroreL:"Error", fatto:"Hecho",
+  fasi:{biblioteca:"Lectura de la Biblioteca", inventario:"Lectura de los archivos", proposte:"Propuestas", simulazione:"Simulación", esecuzione:"Ejecución",
+        verifica:"Verificación", annulla:"Deshaciendo", lettura:"Lectura de la Biblioteca", codici:"Códigos de barras", AI:"IA", MB:"Descarga (MB)", "avvio AI":"Iniciando la IA"},
+  flags:{"categoria incerta":"categoría dudosa","probabile doppione":"probable duplicado","titolo simile in Biblioteca":"título parecido",
+         "autore mancante":"sin autor","senza testo":"sin texto","da controllare":"revisar"},
+  errCartelle:"Faltan carpetas: elige la Biblioteca y al menos una carpeta para ordenar.",
+  manuale:"Abrir el manual completo",
+ },
+};
+const GUIDA = {
+ it: `<h3>Come si usa, in breve</h3><ol>
+  <li><b>Cartelle</b>: scegli la Biblioteca (anche vuota), le cartelle da ordinare e quelle protette.</li>
+  <li><b>Inventario</b>: il programma legge i file, senza spostare niente. Si può interrompere e riprendere.</li>
+  <li><b>Duplicati</b>: vedi le copie identiche e i probabili doppioni.</li>
+  <li><b>Titoli con l'AI</b> (facoltativo): scegli un'AI gratuita o la tua chiave e lasciala lavorare.</li>
+  <li><b>Proposte</b>: controlla categorie, collezioni, titoli e autori. In alto i casi incerti. Clicca una riga per vedere la copertina.</li>
+  <li><b>Simulazione</b>: il programma controlla ogni spostamento senza toccare niente.</li>
+  <li><b>Esecuzione</b>: approvi e il programma sposta i file, poi verifica che siano tutti al loro posto.</li>
+  <li><b>Catalogo ed Excel</b>: aggiorna il catalogo e crea l'elenco con ISBN e codici a barre.</li></ol>
+  <h3>Regole di sicurezza</h3><ul><li>Il programma <b>non cancella mai</b> nessun file e non sovrascrive mai.</li>
+  <li>Le cartelle protette non vengono mai lette né toccate.</li><li>Ogni esecuzione ha un log: con «Annulla un'esecuzione» tutto torna come prima.</li></ul>
+  <h3>Libri nuovi</h3><p>Copia i libri nuovi in una cartella, mettila tra quelle da ordinare e rifai i passi. I libri già presenti in Biblioteca vengono riconosciuti e restano dove sono.</p>
+  <h3>Nomi dei file</h3><p><code>Categoria\\Prefisso - Titolo, sottotitolo - Autore.pdf</code>; nelle collezioni <code>Categoria\\Collezione\\Prefisso - Collezione 03, Titolo - Autore.pdf</code>. Se un nome è già usato si aggiunge «(otra copia)».</p>`,
+ en: `<h3>How to use it, in short</h3><ol>
+  <li><b>Folders</b>: choose the Library (even empty), the folders to organize and the protected ones.</li>
+  <li><b>Inventory</b>: the program reads the files without moving anything. You can stop and resume.</li>
+  <li><b>Duplicates</b>: see identical copies and probable duplicates.</li>
+  <li><b>Titles with AI</b> (optional): choose a free AI or your own key and let it work.</li>
+  <li><b>Proposals</b>: check categories, collections, titles and authors. Uncertain cases are on top. Click a row to see the cover.</li>
+  <li><b>Simulation</b>: the program checks every move without touching anything.</li>
+  <li><b>Run</b>: you approve and the program moves the files, then verifies they are all in place.</li>
+  <li><b>Catalog and Excel</b>: update the catalog and create the list with ISBN and barcodes.</li></ol>
+  <h3>Safety rules</h3><ul><li>The program <b>never deletes</b> any file and never overwrites.</li>
+  <li>Protected folders are never read or touched.</li><li>Every run has a log: with “Undo a run” everything goes back as before.</li></ul>
+  <h3>New books</h3><p>Copy the new books into a folder, add it to the folders to organize and repeat the steps. Books already in the Library are recognized and stay where they are.</p>
+  <h3>File names</h3><p><code>Category\\Prefix - Title, subtitle - Author.pdf</code>; in collections <code>Category\\Collection\\Prefix - Collection 03, Title - Author.pdf</code>. If a name is taken, “(otra copia)” is added.</p>`,
+ es: `<h3>Cómo se usa, en breve</h3><ol>
+  <li><b>Carpetas</b>: elige la Biblioteca (aunque esté vacía), las carpetas para ordenar y las protegidas.</li>
+  <li><b>Inventario</b>: el programa lee los archivos sin mover nada. Se puede interrumpir y reanudar.</li>
+  <li><b>Duplicados</b>: ves las copias idénticas y los probables duplicados.</li>
+  <li><b>Títulos con IA</b> (opcional): elige una IA gratuita o tu clave y déjala trabajar.</li>
+  <li><b>Propuestas</b>: revisa categorías, colecciones, títulos y autores. Arriba los casos dudosos. Haz clic en una fila para ver la portada.</li>
+  <li><b>Simulación</b>: el programa comprueba cada movimiento sin tocar nada.</li>
+  <li><b>Ejecución</b>: apruebas y el programa mueve los archivos, luego verifica que estén todos en su sitio.</li>
+  <li><b>Catálogo y Excel</b>: actualiza el catálogo y crea la lista con ISBN y códigos de barras.</li></ol>
+  <h3>Reglas de seguridad</h3><ul><li>El programa <b>nunca borra</b> ningún archivo y nunca sobrescribe.</li>
+  <li>Las carpetas protegidas nunca se leen ni se tocan.</li><li>Cada ejecución tiene un registro: con «Deshacer una ejecución» todo vuelve a como estaba.</li></ul>
+  <h3>Libros nuevos</h3><p>Copia los libros nuevos en una carpeta, ponla entre las carpetas para ordenar y repite los pasos. Los libros que ya están en la Biblioteca se reconocen y se quedan donde están.</p>
+  <h3>Nombres de los archivos</h3><p><code>Categoría\\Prefijo - Título, subtítulo - Autor.pdf</code>; en las colecciones <code>Categoría\\Colección\\Prefijo - Colección 03, Título - Autor.pdf</code>. Si un nombre ya existe se añade «(otra copia)».</p>`,
+};
+const PASSI = [["cartelle",1],["inventario",2],["duplicati",3],["ai",4],["proposte",5],["simula",6],["esegui",7],["catalogo",8]];
+const EXTRA = ["annulla","impostazioni","guida"];
+const DEC = ["IMPORTA","GIA_IN_BIBLIOTECA","DUPLICATO","DOPPIONE_PROBABILE","NON_IMPORTARE","ALTRI_FILE"];
+let L = "it", INFO = null, API = null, VISTA = "cartelle", SEL = new Set(), FILTRO = "controllare", PAG = 0, CERCA = "", CATS = [], DETN = null, SIM = null, AIS = null;
+const $ = (s, el=document) => el.querySelector(s), $$ = (s, el=document) => [...el.querySelectorAll(s)];
+const t = k => (T[L] && T[L][k] !== undefined) ? T[L][k] : (T.it[k] ?? k);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = n => Number(n || 0).toLocaleString(L === "en" ? "en-US" : L === "es" ? "es-ES" : "it-IT");
+function msg(cls, html) { return `<div class="msg ${cls}">${html}</div>`; }
+
+function traduci() {
+  document.documentElement.lang = L;
+  $$("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
+  $$(".langs button").forEach(b => b.classList.toggle("on", b.dataset.l === L));
+  $("#cerca").placeholder = t("cerca");
+  $("#guidaTesto").innerHTML = GUIDA[L];
+  const tema = $("#tema"); tema.innerHTML = ["auto","light","dark","sepia","contrast"].map(v => `<option value="${v}">${t("t" + v[0].toUpperCase() + v.slice(1))}</option>`).join("");
+  tema.value = localStorage.getItem("biblioteca.tema") || "auto";
+  nav();
+}
+function nav() {
+  const fatti = {cartelle: !!(INFO && INFO.cartelle.biblioteca && INFO.cartelle.sorgenti.length), inventario: !!(INFO && INFO.inventario),
+                 duplicati: !!(INFO && INFO.proposte), proposte: !!(INFO && INFO.proposte)};
+  $("#nav").innerHTML = PASSI.map(([k, n]) => `<a data-v="${k}" class="${VISTA === k ? "on" : ""} ${fatti[k] ? "done" : ""}"><span class="num">${n}</span>${esc(t(k))}${k === "ai" ? ` <span class="small">(${esc(t("facoltativo"))})</span>` : ""}</a>`).join("")
+    + "<hr>" + EXTRA.map(k => `<a data-v="${k}" class="${VISTA === k ? "on" : ""}"><span class="num">${{annulla:"↶",impostazioni:"⚙",guida:"?"}[k]}</span>${esc(t(k))}</a>`).join("");
+}
+function vai(v) {
+  VISTA = v; $$("section").forEach(s => s.classList.toggle("on", s.id === "s-" + v)); nav();
+  ({cartelle: mostraCartelle, inventario: () => {}, duplicati: mostraDuplicati, ai: mostraAI, proposte: () => { caricaCat().then(elenco); },
+    simula: () => {}, esegui: () => {}, catalogo: () => {}, annulla: mostraLog, impostazioni: mostraImpostazioni, guida: () => {}}[v] || (() => {}))();
+}
+async function aggiornaInfo() { INFO = await API.info(); $("#ver").textContent = "v" + INFO.versione; nav(); return INFO; }
+
+// ---------------------------------------------------------------- cartelle
+function mostraCartelle() {
+  const i = INFO.imp, c = INFO.cartelle;
+  $("#fBib").value = i.biblioteca || "";
+  $("#fDup").value = i.duplicati || ""; $("#fDup").placeholder = t("predef") + c.duplicati;
+  $("#fAltri").value = i.altri_file || ""; $("#fAltri").placeholder = t("predef") + c.altri_file;
+  const li = (arr, key) => arr.length ? arr.map((p, k) => `<li><code>${esc(p)}</code><button class="btn small" data-del="${key}" data-k="${k}">${esc(t("togli"))}</button></li>`).join("") : `<li class="small">${esc(t("nessuna"))}</li>`;
+  $("#lSorg").innerHTML = li(i.sorgenti, "sorgenti"); $("#lProt").innerHTML = li(i.protette, "protette");
+  $("#mCartelle").innerHTML = (c.biblioteca && c.sorgenti.length) ? "" : msg("warn", esc(t("errCartelle")));
+}
+async function salvaImp(parte) { INFO = await API.salva_impostazioni(parte); mostraCartelle(); nav(); }
+
+// ---------------------------------------------------------------- lavori
+let poll = null, dopoLavoro = null;
+async function avvia(promessa, poi) {
+  const r = await promessa;
+  if (r && r.errore) { alert(r.errore === "occupato" ? t("occupato") : r.errore); return; }
+  dopoLavoro = poi; $("#bStop").disabled = false;
+  clearInterval(poll); poll = setInterval(seguiLavoro, 500);
+}
+async function seguiLavoro() {
+  const s = await API.stato_lavoro(); if (!s) return;
+  const fase = (t("fasi")[s.fase] || s.fase || "");
+  const pct = s.totale ? Math.round(100 * s.fatti / s.totale) : 0;
+  $("#bar i").style.width = (s.finito ? 100 : pct) + "%";
+  $("#jobtxt").textContent = s.finito ? (s.errore ? t("erroreL") + ": " + s.errore : t("fatto")) : `${fase} ${s.totale ? num(s.fatti) + " / " + num(s.totale) : ""} ${s.cosa || ""}`;
+  if (s.finito) {
+    clearInterval(poll); $("#bStop").disabled = true;
+    await aggiornaInfo();
+    if (dopoLavoro) dopoLavoro(s);
+  }
+}
+
+// ---------------------------------------------------------------- inventario
+function fineInventario(s) {
+  if (s.errore) { $("#rInv").innerHTML = msg("bad", esc(s.errore.startsWith("ValueError: cartelle") ? t("errCartelle") : s.errore)); return; }
+  const r = s.risultato || {};
+  if (r.interrotto) { $("#rInv").innerHTML = msg("warn", esc(t("interrotto"))); return; }
+  $("#rInv").innerHTML = msg("ok", `<b>${esc(t("invFatto"))}</b>: ${num(r.file)} ${esc(t("file"))}, ${num(r.libri)} ${esc(t("libri"))}. ${esc(t(r.modello === "biblioteca" ? "modelloBib" : "modelloBase"))}`)
+    + `<button class="btn" data-open="${esc(r.excel)}">${esc(t("apriXl"))}</button> <button class="btn pri" data-go="duplicati">${esc(t("avanti"))}</button>`;
+}
+
+// ---------------------------------------------------------------- duplicati
+async function mostraDuplicati() {
+  const r = await API.riepilogo();
+  if (!r) { $("#rDup").innerHTML = msg("warn", esc(t("nessunaProposta"))); return; }
+  const d = r.decisioni;
+  $("#rDup").innerHTML = `<div class="stats">${DEC.map(k => `<div class="stat"><b>${num(d[k] || 0)}</b><span>${esc(t("d" + k))}</span></div>`).join("")}</div>`
+    + `<table><tr><th>${esc(t("cN"))}</th><th>${esc(t("cFile"))}</th><th>${esc(t("cDec"))}</th><th>${esc(t("motivo"))}</th><th>${esc(t("simili"))}</th></tr>`
+    + r.doppioni.map(p => `<tr><td>${p.n}</td><td>${esc(p.file)}</td><td>${selDec(p)}</td><td class="small">${esc(p.motivo)}</td><td class="small">${(p.simili || []).map(esc).join("<br>")}</td></tr>`).join("")
+    + `</table><p><button class="btn pri" data-go="ai">${esc(t("avanti"))}</button></p>`;
+}
+function selDec(p) { return `<select data-n="${p.n}" data-f="decisione">${DEC.map(k => `<option value="${k}" ${p.decisione === k ? "selected" : ""}>${esc(t("d" + k))}</option>`).join("")}</select>`; }
+
+// ---------------------------------------------------------------- AI
+const LINK = {gemini: "https://aistudio.google.com/apikey", groq: "https://console.groq.com/keys", claude: "https://console.anthropic.com/settings/keys"};
+async function mostraAI() {
+  AIS = await API.ai_stato();
+  const servizi = ["nessuno","locale","gemini","groq","claude"], nomi = {nessuno:"sNessuno", locale:"sLocale", gemini:"sGemini", groq:"sGroq", claude:"sClaude"};
+  $("#svc").innerHTML = servizi.map(s => `<label class="${AIS.servizio === s ? "on" : ""}"><input type="radio" name="svc" value="${s}" ${AIS.servizio === s ? "checked" : ""}><b>${esc(t(nomi[s]))}</b><small>${esc(t(nomi[s] + "D"))}</small></label>`).join("");
+  guidaAI(); avvioAI();
+}
+function guidaAI() {
+  const s = AIS.servizio, g = $("#aiGuida");
+  if (s === "nessuno") { g.style.display = "none"; return; }
+  g.style.display = "";
+  if (s === "locale") {
+    const l = AIS.locale;
+    if (!l.motore) { g.innerHTML = msg("bad", esc(t("motoreNo"))); return; }
+    g.innerHTML = `<p>${esc(t("locale1"))}</p><p class="small">${esc(t("locale2"))}</p>
+      <p>${esc(t("ram"))}: <b>${l.ram_gb} GB</b> · ${esc(t("consigliato"))}: <b>${l.consigliato}</b></p>
+      <table><tr><th></th><th>MB</th><th></th><th></th></tr>${Object.entries(l.modelli).map(([k, m]) => `<tr><td><label><input type="radio" name="ml" value="${k}" ${(AIS.modello_locale === k || (AIS.modello_locale === "auto" && l.consigliato === k)) ? "checked" : ""}> Qwen3.5 ${k}${k === l.consigliato ? " ★" : ""}</label></td><td>${num(m.mb)}</td>
+        <td>${m.presente ? `<span class="flag" style="background:var(--ok-soft);color:var(--ok)">${esc(t("scaricato"))}</span>` : esc(t("nonScaricato"))}</td>
+        <td>${m.presente ? "" : `<button class="btn small" data-scarica="${k}">${esc(t("scarica"))}</button>`}</td></tr>`).join("")}</table>
+      <p class="row"><button class="btn" id="bImporta">${esc(t("daFile"))}</button><button class="btn" data-prova="locale">${esc(t("prova"))}</button><span id="esitoProva"></span></p>`;
+    return;
+  }
+  const passi = s === "gemini" ? ["gem1","gem2","gem3","gem4","gem5"] : s === "groq" ? ["groq1","groq2","gem5"] : ["cl1","cl2","cl3","gem5"];
+  const chiave = AIS.chiavi[s];
+  g.innerHTML = `<ol class="steps">${passi.map(k => `<li>${esc(k === "gem5" && s !== "gemini" ? t("gem5").replace(/\(.*?\)/, "") : t(k))}</li>`).join("")}</ol>
+    <p><button class="btn" data-link="${LINK[s]}">${esc(t("apriPagina"))}</button></p>
+    ${chiave ? msg("ok", `${esc(t("chiaveSalvata"))}: <code>${esc(chiave)}</code> <button class="btn small" data-togli="${s}">${esc(t("togliChiave"))}</button>`) : ""}
+    <div class="field"><label>${esc(t("incolla"))}</label><textarea id="chiave" rows="2" style="width:100%"></textarea></div>
+    <p class="row"><button class="btn" data-salvachiave="${s}">${esc(t("salvaChiave"))}</button><button class="btn" data-prova="${s}">${esc(t("prova"))}</button><span id="esitoProva"></span></p>
+    ${s === "claude" ? `<div class="field"><label>${esc(t("clModello"))}</label>${AIS.modelli_claude.map(m => `<label style="display:block"><input type="radio" name="mc" value="${m}" ${(AIS.modello || "claude-opus-5-5") === m ? "checked" : ""}> ${m}</label>`).join("")}</div>` : ""}
+    <p class="small">🔒 ${esc(t("chiaveSicura"))}</p>${s === "gemini" ? `<p class="small">ℹ ${esc(t("gemPriv"))}</p>` : ""}`;
+}
+async function avvioAI() {
+  const s = AIS.servizio, box = $("#aiAvvio");
+  if (s === "nessuno") { box.innerHTML = `<button class="btn pri" data-go="proposte">${esc(t("avanti"))}</button>`; return; }
+  if (!INFO.proposte) { box.innerHTML = msg("warn", esc(t("aiPrima"))); return; }
+  const st = await API.ai_stima(s, AIS.modello || "");
+  box.innerHTML = `<div class="stats"><div class="stat"><b>${num(st.libri)}</b><span>${esc(t("aiDaFare"))}</span></div>
+    <div class="stat"><b>${num(st.minuti)}</b><span>${esc(t("aiStima"))} (${esc(t("minuti"))})</span></div>
+    ${st.dollari !== undefined ? `<div class="stat"><b>$ ${st.dollari.toFixed(2)}</b><span>${esc(t("aiCosto"))}</span></div>` : ""}</div>
+    <div class="row"><button class="btn pri" id="bAI" ${st.libri ? "" : "disabled"}>${esc(t("aiAvvia"))}</button><button class="btn" data-go="proposte">${esc(t("avanti"))}</button></div><div id="rAI"></div>`;
+}
+
+// ---------------------------------------------------------------- proposte
+async function caricaCat() { const r = await API.riepilogo(); CATS = r ? r.categorie : []; }
+const FILTRI = ["controllare","importa","doppioni","esclusi","tutti"];
+async function elenco() {
+  $("#filtri").innerHTML = FILTRI.map(f => `<span class="chip ${FILTRO === f ? "on" : ""}" data-filtro="${f}">${esc(t("f" + f[0].toUpperCase() + f.slice(1)))}</span>`).join("")
+    + `<select id="fCat"><option value="">${esc(t("cCat"))}…</option>${CATS.map(c => `<option ${FILTRO === "cat:" + c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>`;
+  const r = await API.elenco(FILTRO, CERCA, PAG, 100);
+  if (!INFO.proposte) { $("#tab").innerHTML = ""; $("#pag1").innerHTML = msg("warn", esc(t("nessunaProposta"))); return; }
+  const pagine = Math.max(1, Math.ceil(r.totale / 100));
+  const pager = `<button class="btn small" data-pag="-1" ${PAG ? "" : "disabled"}>${esc(t("prec"))}</button> ${esc(t("pagina"))} ${PAG + 1} ${esc(t("di"))} ${pagine} · ${num(r.totale)} ${esc(t("libri"))} <button class="btn small" data-pag="1" ${PAG + 1 < pagine ? "" : "disabled"}>${esc(t("succ"))}</button>`;
+  $("#pag1").innerHTML = pager; $("#pag2").innerHTML = pager;
+  $("#tab").innerHTML = `<tr><th><input type="checkbox" id="selAll"></th><th>${esc(t("cN"))}</th><th>${esc(t("cDec"))}</th><th>${esc(t("cCat"))}</th><th>${esc(t("cColl"))}</th><th>${esc(t("cVol"))}</th><th>${esc(t("cTit"))}</th><th>${esc(t("cSub"))}</th><th>${esc(t("cAut"))}</th></tr>`
+    + r.righe.map(riga).join("");
+  bulk();
+}
+function riga(p) {
+  const conf = p.cat_proposte && p.cat_proposte.length ? `<div class="conf ${p.sicurezza < INFO.imp.soglia_sicura ? "low" : ""}">${Math.round(p.sicurezza * 100)}%</div>` : "";
+  const cats = [...(p.cat_proposte || []).map(([c, x]) => [c, ` (${Math.round(x * 100)}%)`]), ...CATS.filter(c => !(p.cat_proposte || []).some(([d]) => d === c)).map(c => [c, ""])];
+  const flags = (p.flags || []).map(f => `<span class="flag">${esc((t("flags")[f]) || f)}</span>`).join("");
+  return `<tr data-row="${p.n}" class="${DETN === p.n ? "sel" : ""}"><td><input type="checkbox" data-sel="${p.n}" ${SEL.has(p.n) ? "checked" : ""}></td><td>${p.n}</td>
+    <td>${selDec(p)}<div>${flags}</div></td>
+    <td><select data-n="${p.n}" data-f="categoria"><option value=""></option>${cats.map(([c, x]) => `<option value="${esc(c)}" ${p.categoria === c ? "selected" : ""}>${esc(c + x)}</option>`).join("")}</select>${conf}</td>
+    <td><input type="text" data-n="${p.n}" data-f="collezione" value="${esc(p.collezione)}" list="dl-${p.n}" style="min-width:120px"></td>
+    <td><input type="text" data-n="${p.n}" data-f="volume" value="${esc(p.volume)}" style="width:44px"></td>
+    <td><input type="text" data-n="${p.n}" data-f="titolo" value="${esc(p.titolo)}" style="min-width:180px"><div class="small" title="${esc(p.file)}">${esc(p.file.slice(0, 60))}</div></td>
+    <td><input type="text" data-n="${p.n}" data-f="sottotitolo" value="${esc(p.sottotitolo)}" style="min-width:120px"></td>
+    <td><input type="text" data-n="${p.n}" data-f="autore" value="${esc(p.autore)}" style="min-width:120px"></td></tr>`;
+}
+function bulk() {
+  $("#bulk").innerHTML = SEL.size ? `${num(SEL.size)} ${esc(t("selezionati"))} · ${esc(t("applicaA"))}
+    <select id="bulkDec"><option value="">${esc(t("cDec"))}…</option>${DEC.map(k => `<option value="${k}">${esc(t("d" + k))}</option>`).join("")}</select>
+    <select id="bulkCat"><option value="">${esc(t("cCat"))}…</option>${CATS.map(c => `<option>${esc(c)}</option>`).join("")}</select>
+    <select id="bulkEsc"><option value="">${esc(t("motivo"))}…</option>${INFO.imp.esclusioni.map(m => `<option>${esc(m)}</option>`).join("")}</select>` : "";
+}
+async function dettaglio(n) {
+  DETN = n; $$("#tab tr").forEach(tr => tr.classList.toggle("sel", tr.dataset.row == n));
+  const d = await API.dettaglio(n); if (!d) return;
+  const fonte = {manuale: "fManuale", ai: "fAi", nome: "fNome", metadati: "fMeta", frontespizio: "fFront"}[d.fonte] || "";
+  $(".split").classList.remove("nodet");
+  $("#det").innerHTML = `<button class="btn small chiudi" id="bChiudiDet">×</button>${d.copertina ? `<img src="${d.copertina}" alt="">` : ""}<h3 style="margin-top:8px">${esc(d.titolo)}</h3>
+    <p class="small">${esc(d.file)}<br>${esc(d.formato)}${d.pagine ? " · " + d.pagine + " p." : ""}${d.isbn && d.isbn.length ? " · ISBN " + d.isbn.map(esc).join(", ") : ""}${d.edizione ? " · " + esc(d.edizione) : ""}
+    ${fonte ? "<br>" + esc(t("fonte")) + ": " + esc(t(fonte)) : ""}${d.motivo ? "<br>" + esc(t("motivo")) + ": " + esc(d.motivo) : ""}</p>
+    ${(d.simili || []).length ? `<p class="small"><b>${esc(t("simili"))}</b><br>${d.simili.map(esc).join("<br>")}</p>` : ""}
+    <p class="row"><button class="btn small" data-open="${esc(d.percorso)}">${esc(t("apriLibro"))}</button>
+    ${d.collezione ? `<button class="btn small" data-numera="${esc(d.categoria)}|${esc(d.collezione)}">${esc(t("numera"))}</button>` : ""}</p>
+    ${(d.pagine_testo || []).filter(x => x.trim()).slice(0, 3).map(x => `<pre>${esc(x.slice(0, 1500))}</pre>`).join("")}`;
+}
+
+// ---------------------------------------------------------------- simulazione ed esecuzione
+async function costruisciPiano() {
+  const r = await API.piano();
+  if (!r) { $("#rPiano").innerHTML = msg("warn", esc(t("nessunaProposta"))); return null; }
+  $("#rPiano").innerHTML = `<div class="stats"><div class="stat"><b>${num(r.operazioni)}</b><span>${esc(t("operazioni"))}</span></div>${Object.entries(r.tipi).map(([k, v]) => `<div class="stat"><b>${num(v)}</b><span>${esc(k)}</span></div>`).join("")}</div>`
+    + (r.errori.length ? msg("bad", `<b>${esc(t("errori"))}</b><ul>${r.errori.slice(0, 50).map(e => `<li>${esc(e)}</li>`).join("")}</ul>`) : "")
+    + (r.avvisi.length ? `<details><summary>${esc(t("avvisi"))} (${r.avvisi.length})</summary><ul>${r.avvisi.slice(0, 300).map(e => `<li class="small">${esc(e)}</li>`).join("")}</ul></details>` : "")
+    + `<p><button class="btn" data-open="${esc(r.excel)}">${esc(t("apriPiano"))}</button></p>`
+    + `<details><summary>${esc(t("prima"))} → ${esc(t("dopo"))}</summary><table>${r.esempi.filter(x => x.nuovo_nome).slice(0, 200).map(x => `<tr><td class="small">${esc(x.file_attuale)}</td><td>→</td><td class="small">${esc(x.destinazione)}</td></tr>`).join("")}</table></details>`;
+  return r;
+}
+function fineSimula(s) {
+  SIM = null;
+  if (s.errore) { $("#rSim").innerHTML = msg("bad", esc(s.errore)); return; }
+  const r = s.risultato || {};
+  if (r.errori) { $("#rSim").innerHTML = msg("bad", `<b>${esc(t("errori"))}</b>`); return; }
+  SIM = !r.problemi.length;
+  $("#rSim").innerHTML = SIM ? msg("ok", esc(t("simOk")) + ` <button class="btn small pri" data-go="esegui">${esc(t("avanti"))}</button>`)
+    : msg("bad", `<b>${esc(t("simNo"))}</b><ul>${r.problemi.slice(0, 50).map(p => `<li>n.${p.n}: ${esc(p.problemi.join("; "))}<br><span class="small">${esc(p.da)}</span></li>`).join("")}</ul>`);
+}
+function fineEsegui(s) {
+  if (s.errore) { $("#rEse").innerHTML = msg("bad", esc(s.errore)); return; }
+  const r = s.risultato, v = r.verifica || {errori: []};
+  SIM = null; $("#approvo").checked = false;
+  $("#rEse").innerHTML = msg(r.problemi.length ? "bad" : "ok", `<b>${num(r.spostati)}</b> ${esc(t("spostati"))}${r.interrotto ? " · " + esc(t("interrotto")) : ""}`)
+    + (v.errori.length ? msg("bad", `<b>${esc(t("verNo"))}</b><ul>${v.errori.slice(0, 50).map(e => `<li>${esc(e)}</li>`).join("")}</ul>`) : msg("ok", esc(t("verOk"))))
+    + `<p>${esc(t("dopoEse"))} <button class="btn pri" data-go="catalogo">${esc(t("avanti"))}</button></p>`;
+}
+
+// ---------------------------------------------------------------- annulla
+async function mostraLog() {
+  await aggiornaInfo();
+  $("#rLog").innerHTML = INFO.log.length ? `<table>${INFO.log.map(l => `<tr><td>${esc(l.log.split(/[\\/]/).pop())}</td><td>${num(l.spostati)} ${esc(t("spostati"))}</td>
+    <td>${l.annullato ? `<span class="flag">${esc(t("giaAnn"))}</span>` : `<button class="btn small" data-ann="${esc(l.log)}" data-reale="0">${esc(t("provaAnn"))}</button> <button class="btn small bad" data-ann="${esc(l.log)}" data-reale="1">${esc(t("annDavvero"))}</button>`}</td></tr>`).join("")}</table>`
+    : msg("ok", esc(t("nessunLog")));
+}
+
+// ---------------------------------------------------------------- impostazioni
+function mostraImpostazioni() {
+  $("#soglia").value = INFO.imp.soglia_sicura;
+  const c = INFO.imp.categorie;
+  $("#tCat").innerHTML = `<tr><th>${esc(t("cNome"))}</th><th>${esc(t("cPref"))}</th><th>${esc(t("cDescr"))}</th><th></th></tr>` + Object.entries(c).map(([k, v]) =>
+    `<tr><td><input type="text" class="cn" value="${esc(k)}"></td><td><input type="text" class="cp" value="${esc(v.prefisso)}"></td><td><input type="text" class="cd" value="${esc(v.descrizione)}"></td><td><button class="btn small" data-delcat>×</button></td></tr>`).join("");
+  $("#lEsc").innerHTML = INFO.imp.esclusioni.map((m, k) => `<li><code>${esc(m)}</code><button class="btn small" data-delesc="${k}">${esc(t("togli"))}</button></li>`).join("");
+}
+function applicaTema(v) { if (v === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.dataset.theme = v; }
+
+// ---------------------------------------------------------------- eventi
+document.addEventListener("click", async e => {
+  const el = e.target.closest("[data-v],[data-go],[data-l],[data-pick],[data-add],[data-del],[data-open],[data-link],[data-filtro],[data-pag],[data-row],[data-scarica],[data-prova],[data-salvachiave],[data-togli],[data-numera],[data-ann],[data-delcat],[data-delesc],button,input[type=radio]");
+  if (!el) return;
+  const ds = el.dataset;
+  if (ds.v || ds.go) return vai(ds.v || ds.go);
+  if (ds.l) { L = ds.l; await API.salva_impostazioni({lingua: L}); traduci(); return vai(VISTA); }
+  if (ds.pick) { const p = await API.scegli_cartella(); if (p) salvaImp({[ds.pick]: p}); return; }
+  if (ds.add) { const p = await API.scegli_cartella(); if (p && !INFO.imp[ds.add].includes(p)) salvaImp({[ds.add]: [...INFO.imp[ds.add], p]}); return; }
+  if (ds.del) { const a = [...INFO.imp[ds.del]]; a.splice(+ds.k, 1); return salvaImp({[ds.del]: a}); }
+  if (ds.open) return API.apri(ds.open);
+  if (ds.link) return API.apri_link(ds.link);
+  if (ds.filtro) { FILTRO = ds.filtro; PAG = 0; SEL.clear(); return elenco(); }
+  if (ds.pag) { PAG += +ds.pag; return elenco(); }
+  if (ds.scarica) return avvia(API.ai_scarica(ds.scarica), () => mostraAI());
+  if (ds.prova) { $("#esitoProva").textContent = "…"; const r = await API.ai_prova(ds.prova, AIS.modello || ""); $("#esitoProva").innerHTML = r.ok ? `<span style="color:var(--ok)">✓ ${esc(t("provaOk"))}</span>` : `<span style="color:var(--bad)">✗ ${esc(t("provaNo"))}: ${esc(r.messaggio)}</span>`; return; }
+  if (ds.salvachiave) { const r = await API.ai_salva_chiave(ds.salvachiave, $("#chiave").value); if (!r.ok) alert(t("chiaveNo")); $("#chiave").value = ""; return mostraAI(); }
+  if (ds.togli) { AIS = await API.ai_togli_chiave(ds.togli); return mostraAI(); }
+  if (ds.numera) { const [c, k] = ds.numera.split("|"); const n = await API.numera(c, k); alert(`${n} ${t("numerati")}`); return elenco(); }
+  if (ds.ann) { if (ds.reale === "1" && !confirm(t("confAnn"))) return; return avvia(API.annulla(ds.ann, ds.reale === "1"), s => { $("#rAnn").innerHTML = s.errore ? msg("bad", esc(s.errore)) : msg("ok", `${num(s.risultato.ok)} ${esc(t(ds.reale === "1" ? "ripristinati" : "daRipristinare"))}, ${num(s.risultato.saltati)} ${esc(t("saltati"))}`); mostraLog(); }); }
+  if (ds.delcat !== undefined) { el.closest("tr").remove(); return; }
+  if (ds.delesc) { const a = [...INFO.imp.esclusioni]; a.splice(+ds.delesc, 1); INFO = await API.salva_impostazioni({esclusioni: a}); return mostraImpostazioni(); }
+  if (el.name === "svc") { AIS = await API.ai_scegli(el.value, el.value === "claude" ? (AIS.modello || "claude-opus-5-5") : "", ""); return mostraAI(); }
+  if (el.name === "ml") { AIS = await API.ai_scegli(AIS.servizio, "", el.value); return avvioAI(); }
+  if (el.name === "mc") { AIS = await API.ai_scegli("claude", el.value, ""); return avvioAI(); }
+  switch (el.id) {
+    case "bInv":
+      if (INFO.proposte && !confirm(t("rifaInv"))) return;
+      return avvia(API.avvia_inventario(), fineInventario);
+    case "bStop": return API.ferma();
+    case "bManuale": return API.apri_manuale(L);
+    case "bChiudiDet": DETN = null; $(".split").classList.add("nodet"); $$("#tab tr.sel").forEach(tr => tr.classList.remove("sel")); return;
+    case "bImporta": return avvia(API.ai_importa(), () => mostraAI());
+    case "bAI": return avvia(API.ai_avvia(AIS.servizio, AIS.modello || ""), s => { $("#rAI").innerHTML = s.errore ? msg("bad", esc(s.errore)) : msg("ok", `${esc(t("aiFatto"))}: ${num(s.risultato.fatti)} · ${esc(t("aiRestano"))} ${num(s.risultato.restano)}`); avvioAI(); });
+    case "bPiano": return costruisciPiano();
+    case "bSim": { const r = await costruisciPiano(); if (r && !r.errori.length) avvia(API.simula(), fineSimula); return; }
+    case "bEse":
+      if (!SIM || !$("#approvo").checked) return alert(t("serveSim"));
+      if (!confirm(t("confEse"))) return;
+      return avvia(API.esegui("ESEGUI"), fineEsegui);
+    case "bCat": return avvia(API.catalogo(), s => { const r = s.risultato || {}; $("#rCat").innerHTML = s.errore ? msg("bad", esc(s.errore)) : r.interrotto ? msg("warn", esc(t("interrotto"))) : msg("ok", `${num(r.libri)} ${esc(t("libri"))} · ${num(r.con_prologo)} ${esc(t("conProl"))} · ${num(r.con_isbn)} ${esc(t("conIsbn"))} · ${num(r.kb)} KB`); });
+    case "bApriCat": return API.apri(INFO.cartelle.biblioteca + "\\Catalogo.html");
+    case "bXl": return avvia(API.elenco_isbn(), s => { const r = s.risultato || {}; $("#rXl").innerHTML = s.errore ? msg("bad", esc(s.errore)) : msg("ok", `${num(r.libri)} ${esc(t("libri"))} · ${num(r.con_isbn)} ${esc(t("conIsbn"))} · ${num(r.con_edizione)} ${esc(t("conEd"))} <button class="btn small" data-open="${esc(r.file)}">${esc(t("apriXl"))}</button>`); });
+    case "bDec": { const p = await API.da_decidere(); if (p) API.apri(p); return; }
+    case "bCatAdd": $("#tCat").insertAdjacentHTML("beforeend", `<tr><td><input type="text" class="cn"></td><td><input type="text" class="cp"></td><td><input type="text" class="cd"></td><td><button class="btn small" data-delcat>×</button></td></tr>`); return;
+    case "bCatSalva": { const c = {}; $$("#tCat tr").forEach(tr => { const n = $(".cn", tr); if (n && n.value.trim()) c[n.value.trim()] = {prefisso: $(".cp", tr).value, descrizione: $(".cd", tr).value}; }); await API.categorie_salva(c); await aggiornaInfo(); return mostraImpostazioni(); }
+    case "bEscAdd": { const v = $("#nuovaEsc").value.trim(); if (v) { INFO = await API.salva_impostazioni({esclusioni: [...INFO.imp.esclusioni, v]}); $("#nuovaEsc").value = ""; mostraImpostazioni(); } return; }
+  }
+  if (ds.row && e.target.tagName !== "INPUT" && e.target.tagName !== "SELECT") return dettaglio(+ds.row);
+});
+document.addEventListener("change", async e => {
+  const el = e.target, ds = el.dataset;
+  if (ds.sel) { el.checked ? SEL.add(+ds.sel) : SEL.delete(+ds.sel); return bulk(); }
+  if (el.id === "selAll") { $$("[data-sel]").forEach(c => { c.checked = el.checked; el.checked ? SEL.add(+c.dataset.sel) : SEL.delete(+c.dataset.sel); }); return bulk(); }
+  if (ds.n && ds.f) {
+    const r = await API.aggiorna(+ds.n, ds.f, el.value);
+    if (ds.f === "categoria") { const conf = el.parentElement.querySelector(".conf"); if (conf) { conf.textContent = "✓"; conf.classList.remove("low"); } }
+    if (VISTA === "duplicati") mostraDuplicati();
+    if (DETN === +ds.n) dettaglio(+ds.n);
+    return r;
+  }
+  if (el.id === "fCat") { FILTRO = el.value ? "cat:" + el.value : "controllare"; PAG = 0; return elenco(); }
+  if (el.id === "bulkDec" || el.id === "bulkCat" || el.id === "bulkEsc") {
+    if (!el.value) return;
+    const nums = [...SEL];
+    if (el.id === "bulkDec") await API.aggiorna_molti(nums, "decisione", el.value);
+    if (el.id === "bulkCat") await API.aggiorna_molti(nums, "categoria", el.value);
+    if (el.id === "bulkEsc") { await API.aggiorna_molti(nums, "decisione", "NON_IMPORTARE"); await API.aggiorna_molti(nums, "motivo", el.value); }
+    SEL.clear(); return elenco();
+  }
+  if (el.id === "tema") { localStorage.setItem("biblioteca.tema", el.value); return applicaTema(el.value); }
+  if (el.id === "soglia") { INFO = await API.salva_impostazioni({soglia_sicura: +el.value}); return; }
+});
+let tCerca = null;
+document.addEventListener("input", e => { if (e.target.id === "cerca") { clearTimeout(tCerca); tCerca = setTimeout(() => { CERCA = e.target.value; PAG = 0; elenco(); }, 300); } });
+
+window.addEventListener("pywebviewready", async () => {
+  API = window.pywebview.api;
+  try { applicaTema(localStorage.getItem("biblioteca.tema") || "auto"); } catch (_) {}
+  await aggiornaInfo();
+  L = INFO.imp.lingua || "it";
+  traduci();
+  vai(INFO.proposte ? "proposte" : INFO.inventario ? "duplicati" : "cartelle");
+  const s = await API.stato_lavoro(); if (s && !s.finito) avvia(Promise.resolve({ok: true}), null);
+});
+</script>
+</body>
+</html>

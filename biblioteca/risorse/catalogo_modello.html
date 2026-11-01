@@ -1,0 +1,1070 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catalogo Biblioteca</title>
+<script>
+// aspetto salvato: applicato prima di disegnare la pagina, cosi' non lampeggia
+(function () {
+  try {
+    const a = JSON.parse(localStorage.getItem("catalogoBiblioteca.aspetto") || "{}");
+    const r = document.documentElement;
+    if (a.tema && a.tema !== "auto") r.dataset.theme = a.tema;
+    if (a.testo && a.testo !== "m") r.dataset.size = a.testo;
+    if (a.vista && a.vista !== "normal") r.dataset.view = a.vista;
+  } catch (e) {}
+})();
+</script>
+<style>
+:root {
+  --bg: #f6f3ee; --panel: #fffdf9; --ink: #2a2622; --muted: #6f675e; --line: #e4ddd2;
+  --accent: #7a4b1f; --accent-soft: #f1e6d8; --chip: #efe9e0; --chip-on: #7a4b1f; --chip-on-ink: #fff;
+  --mark: #fbe7a6; --shadow: 0 1px 2px rgba(60,40,20,.06), 0 2px 8px rgba(60,40,20,.05);
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #1b1916; --panel: #24211d; --ink: #ece6dd; --muted: #a59c90; --line: #3a352f;
+    --accent: #e0a868; --accent-soft: #3a2e22; --chip: #302c27; --chip-on: #e0a868; --chip-on-ink: #1b1916;
+    --mark: #5b4a1c; --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1b1916; --panel: #24211d; --ink: #ece6dd; --muted: #a59c90; --line: #3a352f;
+  --accent: #e0a868; --accent-soft: #3a2e22; --chip: #302c27; --chip-on: #e0a868; --chip-on-ink: #1b1916;
+  --mark: #5b4a1c; --shadow: none;
+}
+:root[data-theme="sepia"] {
+  --bg: #f1e7d0; --panel: #f8f0dc; --ink: #3b2f1e; --muted: #7a6a52; --line: #dccdaa;
+  --accent: #8a4b14; --accent-soft: #ead9b6; --chip: #e8dbbd; --chip-on: #8a4b14; --chip-on-ink: #fff8ea;
+  --mark: #f3d27a; --shadow: none;
+}
+:root[data-theme="contrast"] {
+  --bg: #000; --panel: #0a0a0a; --ink: #fff; --muted: #d6d6d6; --line: #8a8a8a;
+  --accent: #ffd400; --accent-soft: #2b2400; --chip: #1c1c1c; --chip-on: #ffd400; --chip-on-ink: #000;
+  --mark: #ffd400; --shadow: none;
+}
+:root[data-theme="contrast"] mark { color: #000; }
+:root[data-theme="contrast"] .book, :root[data-theme="contrast"] .chip, :root[data-theme="contrast"] .tag { border: 1px solid var(--line); }
+
+/* dimensione del testo nelle schede */
+:root[data-size="l"] .book h3 { font-size: 19px; }
+:root[data-size="l"] .book .by, :root[data-size="l"] .pro { font-size: 16px; }
+:root[data-size="l"] .meta, :root[data-size="l"] .tag, :root[data-size="l"] .actions { font-size: 14px; }
+:root[data-size="xl"] .book h3 { font-size: 22px; }
+:root[data-size="xl"] .book .by, :root[data-size="xl"] .pro { font-size: 18px; }
+:root[data-size="xl"] .meta, :root[data-size="xl"] .tag, :root[data-size="xl"] .actions { font-size: 15.5px; }
+:root[data-size="xl"] .cat { font-size: 16px; }
+:root[data-size="xl"] #guide .gbody { font-size: 17px; }
+
+/* vista compatta: solo titolo, autore e dati, niente prologo e temi */
+:root[data-view="compact"] .book { padding: 9px 14px; margin-bottom: 6px; }
+:root[data-view="compact"] .book .pro, :root[data-view="compact"] .book .tags, :root[data-view="compact"] .more-btn { display: none; }
+:root[data-view="compact"] .book .actions { margin-top: 4px; }
+/* prologo sempre intero */
+:root[data-view="full"] .pro p { display: block; }
+:root[data-view="full"] .more-btn { display: none; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
+a { color: var(--accent); }
+button { font: inherit; color: inherit; }
+
+header { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.top { max-width: 1280px; margin: 0 auto; padding: 14px 20px 10px; display: flex; gap: 12px 16px; align-items: center; flex-wrap: wrap; }
+.brand { font: 600 22px/1.1 var(--serif); letter-spacing: .2px; white-space: nowrap; }
+.brand small { display: block; font: 12px var(--sans); color: var(--muted); letter-spacing: 0; margin-top: 3px; }
+.search { flex: 1 1 380px; display: flex; gap: 8px; }
+.search input { flex: 1; min-width: 0; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); font-size: 16px; }
+.search input:focus, .search select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.search select { padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); }
+.tools { display: flex; gap: 8px; align-items: center; }
+.gear { background: none; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; cursor: pointer; color: var(--muted); white-space: nowrap; }
+.gear:hover { color: var(--ink); }
+.langs { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.langs button { background: none; border: 0; padding: 8px 10px; cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 600; letter-spacing: .04em; }
+.langs button + button { border-left: 1px solid var(--line); }
+.langs button.on { background: var(--accent-soft); color: var(--accent); }
+
+dialog { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); color: var(--ink); width: min(560px, calc(100vw - 32px)); padding: 20px 22px; }
+dialog::backdrop { background: rgba(20, 15, 10, .45); }
+dialog h2 { font: 600 20px var(--serif); margin: 0 0 10px; }
+dialog label { display: block; font-weight: 600; margin: 14px 0 6px; }
+dialog h3 { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 18px 0 4px; padding-top: 12px; border-top: 1px solid var(--line); }
+dialog h3:first-of-type { border-top: 0; padding-top: 0; margin-top: 6px; }
+.look { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.look label { margin: 6px 0 0; font-size: 13px; }
+.look select { display: block; width: 100%; margin-top: 4px; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: 14px var(--sans); }
+@media (max-width: 520px) { .look { grid-template-columns: 1fr; } }
+dialog input { width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: 14px/1.4 Consolas, monospace; }
+dialog code { font: 12.5px Consolas, monospace; background: var(--chip); padding: 1px 5px; border-radius: 4px; }
+.hint { color: var(--muted); font-size: 14px; margin: 6px 0; }
+.hint.small { font-size: 12.5px; }
+.now { font-size: 13px; margin: 10px 0 0; padding: 8px 10px; background: var(--accent-soft); border-radius: 8px; word-break: break-all; }
+.cfg-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+.cfg-actions .grow { flex: 1; }
+.primary { background: var(--accent); color: var(--chip-on-ink); border: 0; border-radius: 8px; padding: 5px 14px; font-weight: 600; cursor: pointer; }
+
+/* guida */
+#guide { width: min(820px, calc(100vw - 24px)); max-height: calc(100vh - 40px); padding: 0; }
+#guide .ghead { position: sticky; top: 0; background: var(--panel); border-bottom: 1px solid var(--line); padding: 16px 22px 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; z-index: 1; }
+#guide .ghead h2 { margin: 0; flex: 1; }
+#guide .gbody { padding: 6px 22px 24px; font-size: 15px; line-height: 1.6; }
+#guide .gbody h3 { font: 600 17px var(--serif); text-transform: none; letter-spacing: 0; color: var(--ink); border-top: 1px solid var(--line); padding-top: 14px; margin: 20px 0 6px; }
+#guide .gbody h3:first-child { border-top: 0; margin-top: 10px; }
+#guide .gbody p { margin: 6px 0; }
+#guide .gbody ul { margin: 6px 0; padding-left: 22px; }
+#guide .gbody li { margin: 3px 0; }
+#guide .gbody .tip { background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; margin: 10px 0; }
+#guide .gbody kbd { font: 12.5px var(--sans); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; background: var(--bg); }
+#guide .gtoc { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 6px; }
+#guide .gtoc a { font-size: 13px; text-decoration: none; background: var(--chip); color: var(--ink); border-radius: 999px; padding: 2px 10px; }
+
+.themes-bar { max-width: 1280px; margin: 0 auto; padding: 0 20px 10px; }
+.themes-toggle { background: none; border: 0; padding: 2px 0; color: var(--muted); cursor: pointer; font-size: 13px; }
+.themes-toggle b { color: var(--ink); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; max-height: 30vh; overflow: auto; }
+.chips[hidden] { display: none; }
+.chip { border: 0; background: var(--chip); border-radius: 999px; padding: 4px 11px; font-size: 13px; cursor: pointer; }
+.chip span { color: var(--muted); font-size: 12px; margin-left: 4px; }
+.chip.on { background: var(--chip-on); color: var(--chip-on-ink); }
+.chip.on span { color: inherit; opacity: .8; }
+
+.wrap { max-width: 1280px; margin: 0 auto; padding: 18px 20px 60px; display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 28px; }
+nav { position: sticky; top: var(--hdr, 120px); align-self: start; max-height: calc(100vh - var(--hdr, 120px) - 10px); overflow: auto; padding-right: 4px; }
+nav h2 { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 8px; }
+.cat { display: flex; justify-content: space-between; gap: 8px; width: 100%; text-align: left; background: none; border: 0; padding: 5px 8px; border-radius: 7px; cursor: pointer; }
+.cat:hover { background: var(--chip); }
+.cat.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.cat .n { color: var(--muted); font-size: 12px; font-weight: 400; }
+.colls { margin: 2px 0 6px 12px; border-left: 2px solid var(--line); padding-left: 6px; }
+.colls .cat { font-size: 13.5px; padding: 3px 8px; }
+.mobile-nav { display: none; }
+
+.status { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; color: var(--muted); font-size: 14px; }
+.status b { color: var(--ink); }
+.reset { background: none; border: 1px solid var(--line); border-radius: 8px; padding: 3px 10px; cursor: pointer; font-size: 13px; }
+.group { font: 600 19px/1.25 var(--serif); margin: 26px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.group:first-of-type { margin-top: 0; }
+.group small { font: 13px var(--sans); color: var(--muted); margin-left: 6px; }
+.group .sep { color: var(--muted); font-weight: 400; }
+
+.book { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow); }
+.book h3 { font: 600 17px/1.3 var(--serif); margin: 0; }
+.book .by { color: var(--muted); margin-top: 2px; }
+.meta { font-size: 12.5px; color: var(--muted); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.fmt { font-size: 11px; font-weight: 600; letter-spacing: .05em; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+.isbn { font-variant-numeric: tabular-nums; user-select: all; }
+/* codice a barre EAN-13: sempre nero su bianco, anche nei temi scuri, se no i lettori non lo leggono */
+.bc { float: right; margin: 0 0 8px 16px; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 5px 6px 3px; line-height: 0; cursor: zoom-in; }
+.bc svg { width: 136px; height: auto; display: block; }
+.bc.big { cursor: zoom-out; }
+.bc.big svg { width: 320px; }
+:root[data-view="compact"] .bc svg { width: 100px; }
+:root[data-view="compact"] .bc.big svg { width: 320px; }
+#fIsbn { border: 1px solid var(--line); border-radius: 8px; padding: 3px 8px; background: var(--panel); color: var(--ink); font-size: 13px; }
+.sfil { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.tag { border: 0; background: var(--chip); border-radius: 999px; padding: 1px 9px; font-size: 12px; cursor: pointer; color: var(--muted); }
+.tag:hover { color: var(--ink); }
+.pro { margin-top: 10px; font-size: 14px; line-height: 1.6; }
+.pro .lab { font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; display: block; margin-bottom: 2px; }
+.pro p { margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.pro.open p { display: block; }
+.pro .none { color: var(--muted); font-style: italic; }
+.actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 13.5px; }
+.actions a, .actions button { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-decoration: none; font-weight: 600; }
+.actions a:hover, .actions button:hover { text-decoration: underline; }
+/* la mia sezione: preferiti, in lettura, letti */
+.mks { display: flex; gap: 12px; flex-wrap: wrap; margin-left: auto; }
+.actions .mk { color: var(--muted); font-weight: 600; }
+.actions .mk.on { color: var(--accent); }
+nav h2 + #mine { margin-bottom: 14px; }
+#mine .cat .ic { display: inline-block; width: 1.3em; }
+mark { background: var(--mark); color: inherit; border-radius: 2px; padding: 0 1px; }
+.empty { padding: 40px 0; text-align: center; color: var(--muted); }
+#more { height: 1px; }
+.more-wrap { text-align: center; margin-top: 14px; }
+.more-wrap .reset { padding: 8px 18px; font-size: 14px; }
+
+@media (max-width: 860px) {
+  header { position: static; }
+  .gear span { display: none; }
+  .wrap { grid-template-columns: minmax(0, 1fr); padding: 14px 16px 50px; }
+  .top, .themes-bar { padding-left: 16px; padding-right: 16px; }
+  nav { display: none; }
+  .mobile-nav { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .mobile-nav select { width: 100%; min-width: 0; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); }
+  #guide .ghead, #guide .gbody { padding-left: 16px; padding-right: 16px; }
+}
+@media (max-width: 560px) {
+  /* sul telefono il codice a barre va sotto titolo, autore e dati, non sopra */
+  .book { display: flex; flex-direction: column; }
+  .bc { float: none; order: 1; align-self: flex-start; margin: 8px 0 0; }
+  .book .tags, .book .pro, .book .actions { order: 2; }
+  .bc.big svg { width: min(320px, calc(100vw - 70px)); }
+}
+</style>
+</head>
+<body>
+<header id="hdr">
+  <div class="top">
+    <div class="brand"><span data-i18n="brand">Biblioteca</span><small id="tot"></small></div>
+    <div class="search">
+      <input id="q" type="search" data-i18n-ph="searchPh" autocomplete="off" autofocus>
+      <select id="field" data-i18n-title="fieldLabel">
+        <option value="all" data-i18n="fAll"></option>
+        <option value="t" data-i18n="fT"></option>
+        <option value="a" data-i18n="fA"></option>
+        <option value="x" data-i18n="fX"></option>
+        <option value="i">ISBN</option>
+      </select>
+    </div>
+    <div class="tools">
+      <div class="langs" role="group" aria-label="Lingua / Language / Idioma">
+        <button data-lang="it" title="Italiano">IT</button><button data-lang="en" title="English">EN</button><button data-lang="es" title="Español">ES</button>
+      </div>
+      <button class="gear" id="openGuide" data-i18n-title="guide">? <span data-i18n="guide"></span></button>
+      <button class="gear" id="openCfg" data-i18n-title="settings">⚙ <span data-i18n="settings"></span></button>
+    </div>
+  </div>
+  <div class="themes-bar">
+    <button class="themes-toggle" id="themesToggle" aria-expanded="false"><span id="themesArrow">▸ </span><b data-i18n="themes"></b> <span id="themesSel"></span></button>
+    <div class="chips" id="chips" hidden></div>
+  </div>
+</header>
+
+<dialog id="cfg">
+  <form method="dialog" id="cfgForm">
+    <h2 data-i18n="settings"></h2>
+    <h3 data-i18n="appearance"></h3>
+    <div class="look">
+      <label><span data-i18n="language"></span>
+        <select id="aLingua">
+          <option value="it">Italiano</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+        </select>
+      </label>
+      <label><span data-i18n="theme"></span>
+        <select id="aTema">
+          <option value="auto" data-i18n="thAuto"></option>
+          <option value="light" data-i18n="thLight"></option>
+          <option value="dark" data-i18n="thDark"></option>
+          <option value="sepia" data-i18n="thSepia"></option>
+          <option value="contrast" data-i18n="thContrast"></option>
+        </select>
+      </label>
+      <label><span data-i18n="text"></span>
+        <select id="aTesto">
+          <option value="m" data-i18n="txM"></option>
+          <option value="l" data-i18n="txL"></option>
+          <option value="xl" data-i18n="txXL"></option>
+        </select>
+      </label>
+      <label><span data-i18n="cards"></span>
+        <select id="aVista">
+          <option value="normal" data-i18n="vNormal"></option>
+          <option value="full" data-i18n="vFull"></option>
+          <option value="compact" data-i18n="vCompact"></option>
+        </select>
+      </label>
+    </div>
+    <p class="hint small" data-i18n="lookHint"></p>
+
+    <h3 data-i18n="location"></h3>
+    <p class="hint" data-i18n="locHint1"></p>
+    <p class="hint" data-i18n="locHint2"></p>
+    <label for="base" data-i18n="folder"></label>
+    <input id="base" type="text" spellcheck="false" data-i18n-ph="folderPh">
+    <p class="hint small"><span data-i18n="examples"></span> <code>E:\Biblioteca</code> · <code>\\NAS\libri\Biblioteca</code> · <code>/Users/nome/Biblioteca</code></p>
+    <p class="now" id="cfgNow"></p>
+    <div class="cfg-actions">
+      <button type="button" class="reset" id="cfgTest" data-i18n="test"></button>
+      <span class="grow"></span>
+      <button type="button" class="reset" id="cfgClear" data-i18n="restore"></button>
+      <button type="button" class="reset" id="cfgCancel" data-i18n="cancel"></button>
+      <button type="submit" class="primary" id="cfgSave" data-i18n="save"></button>
+    </div>
+    <p class="hint small" data-i18n="savedHint"></p>
+
+    <h3 data-i18n="mine"></h3>
+    <p class="hint" data-i18n="myHint1"></p>
+    <p class="hint" data-i18n="myHint2"></p>
+    <p class="now" id="myNow"></p>
+    <div class="cfg-actions">
+      <button type="button" class="reset" id="myExport" data-i18n="export"></button>
+      <button type="button" class="reset" id="myImport" data-i18n="import"></button>
+      <input type="file" id="myFile" accept=".json,application/json" hidden>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="guide">
+  <div class="ghead">
+    <h2 data-i18n="guideTitle"></h2>
+    <div class="langs" role="group" aria-label="Lingua / Language / Idioma">
+      <button data-glang="it">IT</button><button data-glang="en">EN</button><button data-glang="es">ES</button>
+    </div>
+    <button class="reset" id="guideClose" data-i18n="close"></button>
+  </div>
+  <div class="gbody" id="guideBody"></div>
+</dialog>
+
+<div class="wrap">
+  <nav id="nav"><h2 data-i18n="mine"></h2><div id="mine"></div><h2 data-i18n="categories"></h2><div id="cats"></div></nav>
+  <main>
+    <div class="mobile-nav"><select id="mCat"></select><select id="mColl"></select></div>
+    <div class="status"><div id="count"></div>
+      <div class="sfil">
+        <select id="fIsbn" data-i18n-title="isbnFilter"><option value=""></option><option value="si"></option><option value="no"></option></select>
+        <button class="reset" id="reset" hidden data-i18n="resetFilters"></button>
+      </div>
+    </div>
+    <div id="list"></div>
+    <div id="more"></div>
+    <div class="more-wrap"><button class="reset" id="moreBtn" hidden></button></div>
+  </main>
+</div>
+
+<script>
+const DATA = /*__DATI__*/null;
+const TEMI = DATA.temi, LIBRI = DATA.libri;
+const $ = id => document.getElementById(id);
+const norm = s => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+const esc = s => (s || "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const store = {
+  get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set: (k, v) => { try { v == null || v === "" ? localStorage.removeItem(k) : localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+};
+
+// ===================== testi dell'interfaccia (IT / EN / ES) =====================
+const T = {
+  it: {
+    title: "Catalogo Biblioteca", brand: "Biblioteca",
+    tot: (n, c) => `${n} libri · ${c} categorie`,
+    searchPh: "Cerca titolo, autore, parole del prologo…", fieldLabel: "Dove cercare",
+    fAll: "Ovunque", fT: "Titolo", fA: "Autore", fX: "Prologo",
+    guide: "Guida", settings: "Impostazioni", themes: "Temi", themesPick: "scegli uno o più temi",
+    categories: "Categorie", all: "Tutte", allColl: "Tutto", allCats: "Tutte le categorie", allColls: "Tutte le collezioni",
+    resetFilters: "Azzera filtri",
+    isbnFilter: "Filtra per ISBN", isbnAll: n => `Tutti i libri (${n})`, isbnYes: n => `Con ISBN (${n})`, isbnNo: n => `Senza ISBN (${n})`,
+    bcZoom: "Codice a barre dell'ISBN: clic per ingrandirlo e scansionarlo",
+    count: (n, one, found) => `<b>${n}</b> ${one ? "libro" : "libri"}${found ? (one ? " trovato" : " trovati") : ""}`,
+    empty: "Nessun libro trovato. Prova con meno parole o togli qualche filtro.",
+    noAuthor: "Autore sconosciuto", pages: n => `${n} pagine`, pageAbbr: "p.",
+    scan: "PDF scansionato senza testo: prologo non disponibile.", noPro: "Prologo non trovato nelle prime pagine.",
+    open: f => `Apri ${f}`, goPro: "Vai al prologo", readAll: "Leggi tutto", less: "Riduci",
+    more: (k, n) => `Mostra altri ${k} (ne restano ${n})`,
+    pro: { "Prólogo": "Prologo", "Prefacio": "Prefazione", "Presentación": "Presentazione", "Nota del autor": "Nota dell'autore", "Introducción": "Introduzione", "Inizio del testo": "Inizio del libro" },
+    appearance: "Aspetto", language: "Lingua", theme: "Tema", text: "Testo", cards: "Schede",
+    thAuto: "Automatico", thLight: "Chiaro", thDark: "Scuro", thSepia: "Seppia (lettura)", thContrast: "Alto contrasto",
+    txM: "Normale", txL: "Grande", txXL: "Molto grande",
+    vNormal: "Normali", vFull: "Prologo intero", vCompact: "Compatte",
+    lookHint: "L'aspetto cambia subito. \"Automatico\" segue chiaro o scuro del PC; \"Compatte\" mostra solo titolo, autore e dati, senza prologo.",
+    location: "Posizione dei libri",
+    locHint1: "Se sposti <b>tutta</b> la cartella della Biblioteca, con <code>Catalogo.html</code> dentro, su un altro disco o PC, non serve cambiare nulla: lascia il campo vuoto.",
+    locHint2: "Se invece i libri stanno in un posto diverso da questa pagina, scrivi qui la cartella che contiene le categorie (Apologética, Biblias, Comentarios…).",
+    folder: "Cartella dei libri", folderPh: "Vuoto = stessa cartella di questa pagina", examples: "Esempi:",
+    nowSet: "I libri verranno aperti da:", nowEmpty: "I libri vengono aperti dalla <b>stessa cartella di questa pagina</b>.",
+    test: "Prova con un libro", restore: "Ripristina", cancel: "Annulla", save: "Salva",
+    savedHint: "Le impostazioni restano salvate in questo browser, su questo PC.",
+    saveFail: "Questo browser non permette di salvare l'impostazione: varrà solo finché la pagina resta aperta.",
+    guideTitle: "Guida al catalogo", close: "Chiudi",
+    mine: "La mia sezione", myFav: "Preferiti", myRead: "Sto leggendo", myDone: "Letti",
+    mkFav: "Preferito", mkRead: "Sto leggendo", mkDone: "Letto",
+    tFav: "Aggiungi o togli dai Preferiti", tRead: "Segna o togli: lo sto leggendo", tDone: "Segna o togli: l'ho già letto",
+    myEmpty: "Questa lista è vuota. Nella scheda di un libro usa ☆ Preferito, 📖 Sto leggendo o ✓ Letto.",
+    myHint1: "Preferiti, libri in lettura e libri letti restano salvati in questo browser, su questo PC.",
+    myHint2: "Per portarli su un altro PC o browser: <b>Esporta</b> crea un file; lì apri il catalogo, vai nelle Impostazioni e premi <b>Importa</b>. L'importazione aggiunge e non cancella nulla.",
+    myCount: (f, r, d) => `Ora: <b>${f}</b> preferiti, <b>${r}</b> in lettura, <b>${d}</b> letti.`,
+    export: "Esporta", import: "Importa",
+    importOk: (f, r, d) => `Importati: ${f} preferiti, ${r} in lettura, ${d} letti.`,
+    importBad: "Questo file non contiene i preferiti del catalogo.",
+  },
+  en: {
+    title: "Library Catalogue", brand: "Library",
+    tot: (n, c) => `${n} books · ${c} categories`,
+    searchPh: "Search title, author, words in the prologue…", fieldLabel: "Where to search",
+    fAll: "Everywhere", fT: "Title", fA: "Author", fX: "Prologue",
+    guide: "Guide", settings: "Settings", themes: "Themes", themesPick: "choose one or more themes",
+    categories: "Categories", all: "All", allColl: "All", allCats: "All categories", allColls: "All collections",
+    resetFilters: "Clear filters",
+    isbnFilter: "Filter by ISBN", isbnAll: n => `All books (${n})`, isbnYes: n => `With ISBN (${n})`, isbnNo: n => `Without ISBN (${n})`,
+    bcZoom: "ISBN barcode: click to enlarge it for scanning",
+    count: (n, one, found) => `<b>${n}</b> ${one ? "book" : "books"}${found ? " found" : ""}`,
+    empty: "No books found. Try fewer words or remove some filters.",
+    noAuthor: "Unknown author", pages: n => `${n} pages`, pageAbbr: "p.",
+    scan: "Scanned PDF without text: prologue not available.", noPro: "No prologue found in the first pages.",
+    open: f => `Open ${f}`, goPro: "Go to prologue", readAll: "Read more", less: "Show less",
+    more: (k, n) => `Show ${k} more (${n} left)`,
+    pro: { "Prólogo": "Foreword", "Prefacio": "Preface", "Presentación": "Presentation", "Nota del autor": "Author's note", "Introducción": "Introduction", "Inizio del testo": "Beginning of the book" },
+    appearance: "Appearance", language: "Language", theme: "Theme", text: "Text", cards: "Cards",
+    thAuto: "Automatic", thLight: "Light", thDark: "Dark", thSepia: "Sepia (reading)", thContrast: "High contrast",
+    txM: "Normal", txL: "Large", txXL: "Extra large",
+    vNormal: "Normal", vFull: "Full prologue", vCompact: "Compact",
+    lookHint: "Changes apply immediately. \"Automatic\" follows your computer's light or dark mode; \"Compact\" shows only title, author and details, without the prologue.",
+    location: "Location of the books",
+    locHint1: "If you move the <b>whole</b> library folder, with <code>Catalogo.html</code> inside it, to another drive or computer, nothing needs changing: leave the field empty.",
+    locHint2: "If instead the books are somewhere other than this page, type here the folder that contains the categories (Apologética, Biblias, Comentarios…).",
+    folder: "Books folder", folderPh: "Empty = same folder as this page", examples: "Examples:",
+    nowSet: "Books will be opened from:", nowEmpty: "Books are opened from <b>the same folder as this page</b>.",
+    test: "Try with a book", restore: "Reset", cancel: "Cancel", save: "Save",
+    savedHint: "Settings are saved in this browser, on this computer.",
+    saveFail: "This browser does not allow saving the setting: it will only last while the page stays open.",
+    guideTitle: "Catalogue guide", close: "Close",
+    mine: "My section", myFav: "Favourites", myRead: "Reading now", myDone: "Read",
+    mkFav: "Favourite", mkRead: "Reading", mkDone: "Read",
+    tFav: "Add to or remove from Favourites", tRead: "Mark or unmark: I am reading it", tDone: "Mark or unmark: I have read it",
+    myEmpty: "This list is empty. On a book card use ☆ Favourite, 📖 Reading or ✓ Read.",
+    myHint1: "Favourites, books you are reading and books you have read are saved in this browser, on this computer.",
+    myHint2: "To take them to another computer or browser: <b>Export</b> creates a file; there, open the catalogue, go to Settings and press <b>Import</b>. Importing adds and never deletes anything.",
+    myCount: (f, r, d) => `Now: <b>${f}</b> favourites, <b>${r}</b> reading, <b>${d}</b> read.`,
+    export: "Export", import: "Import",
+    importOk: (f, r, d) => `Imported: ${f} favourites, ${r} reading, ${d} read.`,
+    importBad: "This file does not contain catalogue favourites.",
+  },
+  es: {
+    title: "Catálogo de la Biblioteca", brand: "Biblioteca",
+    tot: (n, c) => `${n} libros · ${c} categorías`,
+    searchPh: "Busca título, autor, palabras del prólogo…", fieldLabel: "Dónde buscar",
+    fAll: "En todo", fT: "Título", fA: "Autor", fX: "Prólogo",
+    guide: "Guía", settings: "Ajustes", themes: "Temas", themesPick: "elige uno o más temas",
+    categories: "Categorías", all: "Todas", allColl: "Todo", allCats: "Todas las categorías", allColls: "Todas las colecciones",
+    resetFilters: "Quitar filtros",
+    isbnFilter: "Filtrar por ISBN", isbnAll: n => `Todos los libros (${n})`, isbnYes: n => `Con ISBN (${n})`, isbnNo: n => `Sin ISBN (${n})`,
+    bcZoom: "Código de barras del ISBN: clic para ampliarlo y escanearlo",
+    count: (n, one, found) => `<b>${n}</b> ${one ? "libro" : "libros"}${found ? (one ? " encontrado" : " encontrados") : ""}`,
+    empty: "No se encontró ningún libro. Prueba con menos palabras o quita algún filtro.",
+    noAuthor: "Autor desconocido", pages: n => `${n} páginas`, pageAbbr: "pág.",
+    scan: "PDF escaneado sin texto: prólogo no disponible.", noPro: "No se encontró el prólogo en las primeras páginas.",
+    open: f => `Abrir ${f}`, goPro: "Ir al prólogo", readAll: "Leer todo", less: "Reducir",
+    more: (k, n) => `Mostrar ${k} más (quedan ${n})`,
+    pro: { "Prólogo": "Prólogo", "Prefacio": "Prefacio", "Presentación": "Presentación", "Nota del autor": "Nota del autor", "Introducción": "Introducción", "Inizio del testo": "Inicio del libro" },
+    appearance: "Apariencia", language: "Idioma", theme: "Tema", text: "Texto", cards: "Fichas",
+    thAuto: "Automático", thLight: "Claro", thDark: "Oscuro", thSepia: "Sepia (lectura)", thContrast: "Alto contraste",
+    txM: "Normal", txL: "Grande", txXL: "Muy grande",
+    vNormal: "Normales", vFull: "Prólogo completo", vCompact: "Compactas",
+    lookHint: "Los cambios se aplican al instante. \"Automático\" sigue el modo claro u oscuro del ordenador; \"Compactas\" muestra solo título, autor y datos, sin prólogo.",
+    location: "Ubicación de los libros",
+    locHint1: "Si mueves <b>toda</b> la carpeta de la Biblioteca, con <code>Catalogo.html</code> dentro, a otro disco u ordenador, no hay que cambiar nada: deja el campo vacío.",
+    locHint2: "Si en cambio los libros están en un lugar distinto de esta página, escribe aquí la carpeta que contiene las categorías (Apologética, Biblias, Comentarios…).",
+    folder: "Carpeta de los libros", folderPh: "Vacío = misma carpeta que esta página", examples: "Ejemplos:",
+    nowSet: "Los libros se abrirán desde:", nowEmpty: "Los libros se abren desde <b>la misma carpeta que esta página</b>.",
+    test: "Probar con un libro", restore: "Restablecer", cancel: "Cancelar", save: "Guardar",
+    savedHint: "Los ajustes quedan guardados en este navegador, en este ordenador.",
+    saveFail: "Este navegador no permite guardar el ajuste: solo valdrá mientras la página siga abierta.",
+    guideTitle: "Guía del catálogo", close: "Cerrar",
+    mine: "Mi sección", myFav: "Favoritos", myRead: "Leyendo", myDone: "Leídos",
+    mkFav: "Favorito", mkRead: "Leyendo", mkDone: "Leído",
+    tFav: "Añadir o quitar de Favoritos", tRead: "Marcar o desmarcar: lo estoy leyendo", tDone: "Marcar o desmarcar: ya lo leí",
+    myEmpty: "Esta lista está vacía. En la ficha de un libro usa ☆ Favorito, 📖 Leyendo o ✓ Leído.",
+    myHint1: "Los favoritos, los libros que estás leyendo y los leídos quedan guardados en este navegador, en este ordenador.",
+    myHint2: "Para llevarlos a otro ordenador o navegador: <b>Exportar</b> crea un archivo; allí abre el catálogo, ve a Ajustes y pulsa <b>Importar</b>. La importación añade y no borra nada.",
+    myCount: (f, r, d) => `Ahora: <b>${f}</b> favoritos, <b>${r}</b> leyendo, <b>${d}</b> leídos.`,
+    export: "Exportar", import: "Importar",
+    importOk: (f, r, d) => `Importados: ${f} favoritos, ${r} leyendo, ${d} leídos.`,
+    importBad: "Este archivo no contiene favoritos del catálogo.",
+  },
+};
+
+// ===================== guida (IT / EN / ES) =====================
+const GUIDE = {
+  it: `
+<nav class="gtoc"><a href="#g-apri">Aprire</a><a href="#g-cerca">Cercare</a><a href="#g-cat">Categorie</a><a href="#g-temi">Temi</a><a href="#g-scheda">Scheda del libro</a><a href="#g-miei">La mia sezione</a><a href="#g-imp">Impostazioni</a><a href="#g-sposta">Spostare la Biblioteca</a><a href="#g-faq">Domande frequenti</a></nav>
+<h3 id="g-apri">1. Aprire il catalogo</h3>
+<p>Fai doppio clic su <b>Catalogo.html</b>, nella cartella della Biblioteca. Si apre nel browser (Chrome, Edge, Firefox) e funziona <b>senza internet</b>. Con molti libri può servire qualche secondo.</p>
+<p>In alto a destra trovi: <b>IT · EN · ES</b> per cambiare lingua, <b>? Guida</b> (questa pagina) e <b>⚙ Impostazioni</b>.</p>
+<h3 id="g-cerca">2. Cercare un libro</h3>
+<ul>
+<li>Scrivi nella casella di ricerca: titolo, autore, ISBN o parole che compaiono nel prologo.</li>
+<li>Gli accenti non contano: <i>oracion</i> trova anche <i>oración</i>.</li>
+<li>Con più parole compaiono solo i libri che le contengono <b>tutte</b> (es. <i>matrimonio feliz</i>).</li>
+<li>Il menu accanto alla casella limita la ricerca a <b>Titolo</b>, <b>Autore</b>, <b>Prologo</b> o <b>ISBN</b>. L'ISBN si può scrivere con o senza trattini.</li>
+<li>Il menu <b>Tutti i libri / Con ISBN / Senza ISBN</b>, sopra l'elenco a destra, mostra solo i libri che hanno (o non hanno) l'ISBN.</li>
+<li>Le parole trovate sono evidenziate in giallo. <b>Azzera filtri</b> toglie ricerca, categoria, filtro ISBN e temi.</li>
+</ul>
+<h3 id="g-cat">3. Categorie e collezioni</h3>
+<p>A sinistra c'è l'elenco delle categorie con il numero di libri. Cliccando una categoria si vedono sotto le sue <b>collezioni</b> (serie e opere in più volumi), ordinate per numero di volume. Sul telefono categorie e collezioni sono due menu a tendina sopra l'elenco.</p>
+<p class="tip">I nomi delle categorie sono in spagnolo perché sono i nomi delle cartelle sul disco.</p>
+<h3 id="g-temi">4. Temi</h3>
+<p>Clicca <b>▸ Temi</b> sotto la ricerca per vedere i temi (Preghiera, Matrimonio, Guerra spirituale, Fine dei tempi…). Puoi sceglierne più di uno: compaiono i libri che li hanno tutti. Anche i temi sotto ogni libro sono cliccabili.</p>
+<p class="tip">I temi sono assegnati automaticamente dal titolo e dal prologo: non tutti i libri ne hanno uno. Se un tema non basta, usa anche la ricerca libera.</p>
+<h3 id="g-scheda">5. La scheda di un libro</h3>
+<ul>
+<li><b>Titolo e autore</b>, poi collezione, numero di pagine (o la sigla <b>EPUB</b>) e <b>ISBN</b>: un clic sull'ISBN lo seleziona per copiarlo.</li>
+<li><b>Codice a barre</b> (a destra, solo per i libri con ISBN): è l'EAN-13 che si trova sul retro dei libri. Un clic lo ingrandisce, così si può leggere con un lettore di codici a barre o con il telefono; un altro clic lo rimpicciolisce.</li>
+<li><b>Prologo</b>: l'inizio del Prologo, Prefazione o Introduzione. Se il libro non ne ha uno, compare l'<b>inizio del libro</b>. <b>Leggi tutto</b> lo apre per intero.</li>
+<li><b>Apri PDF / Apri EPUB</b> apre il libro. <b>Vai al prologo</b> (solo PDF) apre il PDF alla pagina giusta.</li>
+<li>Per i PDF scansionati senza testo il prologo non è disponibile, ma il libro si apre normalmente.</li>
+</ul>
+<h3 id="g-miei">6. La mia sezione: preferiti, in lettura, letti</h3>
+<ul>
+<li>In fondo alla scheda di ogni libro ci sono tre pulsanti: <b>☆ Preferito</b>, <b>📖 Sto leggendo</b> e <b>✓ Letto</b>. Un clic segna il libro (il pulsante si colora), un altro clic lo toglie.</li>
+<li>A sinistra, sopra le categorie, <b>La mia sezione</b> mostra le tre liste con il numero di libri: un clic apre la lista, senza dover cercare i libri. Sul telefono le liste sono nel primo menu a tendina.</li>
+<li>Quando segni un libro come <b>Letto</b>, esce da <b>Sto leggendo</b>. Un libro può essere Preferito e insieme in lettura o letto.</li>
+<li>Dentro una lista funzionano anche la ricerca, i temi e il filtro ISBN.</li>
+</ul>
+<p class="tip">Le liste restano salvate in questo browser, su questo PC. Per portarle altrove usa <b>⚙ Impostazioni → La mia sezione → Esporta</b>, poi <b>Importa</b> sull'altro PC. Conviene esportarle ogni tanto anche come copia di sicurezza.</p>
+<h3 id="g-imp">7. Impostazioni (⚙)</h3>
+<p><b>Aspetto</b> — le modifiche si vedono subito:</p>
+<ul>
+<li><b>Lingua</b>: italiano, inglese o spagnolo (come i pulsanti IT · EN · ES).</li>
+<li><b>Tema</b>: Automatico (segue chiaro/scuro del PC), Chiaro, Scuro, Seppia (colore carta, riposante) e Alto contrasto (nero e giallo).</li>
+<li><b>Testo</b>: Normale, Grande, Molto grande.</li>
+<li><b>Schede</b>: Normali (inizio del prologo), Prologo intero (sempre aperto), Compatte (solo titolo, autore e dati: comode per scorrere molti libri).</li>
+</ul>
+<p><b>Posizione dei libri</b> — serve solo se i libri sono in un posto diverso da <code>Catalogo.html</code>:</p>
+<ul>
+<li>Scrivi la cartella che contiene le categorie, per esempio <code>E:\\Biblioteca</code> o <code>\\\\NAS\\libri\\Biblioteca</code>.</li>
+<li><b>Prova con un libro</b> apre un PDF per controllare che il percorso sia giusto. Poi premi <b>Salva</b>.</li>
+<li><b>Ripristina</b> svuota il campo: i libri tornano ad aprirsi dalla cartella della pagina.</li>
+</ul>
+<p class="tip">Tutte le impostazioni restano salvate nel browser di quel PC. Su un altro PC o con un altro browser vanno scelte di nuovo.</p>
+<h3 id="g-sposta">8. Spostare la Biblioteca o usarla su un altro PC</h3>
+<p>Se copi o sposti <b>tutta</b> la cartella della Biblioteca (con <code>Catalogo.html</code> dentro) su un altro disco, una chiavetta o un altro PC, il catalogo continua a funzionare senza cambiare nulla. Solo se tieni la pagina e i libri in posti diversi devi indicare la cartella nelle Impostazioni.</p>
+<h3 id="g-faq">9. Domande frequenti</h3>
+<ul>
+<li><b>Cliccando "Apri" non succede nulla o il file non si trova.</b> La pagina non è nella cartella dei libri: indica la cartella in ⚙ Impostazioni → Posizione dei libri.</li>
+<li><b>Gli EPUB non si aprono nel browser.</b> È normale: servono un programma per ebook (per esempio Calibre o Thorium Reader) o un e-reader. Il browser li apre con quel programma o li scarica.</li>
+<li><b>Un libro non ha prologo.</b> È una scansione senza testo oppure il prologo non è nelle prime pagine: apri il libro.</li>
+<li><b>Ho aggiunto libri nuovi ma non compaiono.</b> Il catalogo va rigenerato da chi gestisce la Biblioteca: nel programma Biblioteca, passo <b>Catalogo ed Excel</b> → <b>Aggiorna il catalogo</b>.</li>
+<li><b>I miei preferiti sono spariti.</b> Le liste sono salvate nel browser: con un altro browser, un altro PC o dopo aver cancellato i dati di navigazione non ci sono. Ripristinale con <b>Importa</b> dal file esportato.</li>
+</ul>`,
+  en: `
+<nav class="gtoc"><a href="#g-apri">Opening</a><a href="#g-cerca">Searching</a><a href="#g-cat">Categories</a><a href="#g-temi">Themes</a><a href="#g-scheda">Book card</a><a href="#g-miei">My section</a><a href="#g-imp">Settings</a><a href="#g-sposta">Moving the library</a><a href="#g-faq">FAQ</a></nav>
+<h3 id="g-apri">1. Opening the catalogue</h3>
+<p>Double-click <b>Catalogo.html</b> in the library folder. It opens in your browser (Chrome, Edge, Firefox) and works <b>without internet</b>. With many books it may take a few seconds.</p>
+<p>At the top right you will find <b>IT · EN · ES</b> to change language, <b>? Guide</b> (this page) and <b>⚙ Settings</b>.</p>
+<h3 id="g-cerca">2. Searching for a book</h3>
+<ul>
+<li>Type in the search box: title, author, ISBN or words that appear in the prologue.</li>
+<li>Accents do not matter: <i>oracion</i> also finds <i>oración</i>.</li>
+<li>With several words, only books containing <b>all</b> of them are shown (e.g. <i>matrimonio feliz</i>).</li>
+<li>The menu next to the box limits the search to <b>Title</b>, <b>Author</b>, <b>Prologue</b> or <b>ISBN</b>. The ISBN can be typed with or without hyphens.</li>
+<li>The <b>All books / With ISBN / Without ISBN</b> menu, above the list on the right, shows only the books that have (or do not have) an ISBN.</li>
+<li>Matching words are highlighted in yellow. <b>Clear filters</b> removes the search, category, ISBN filter and themes.</li>
+</ul>
+<h3 id="g-cat">3. Categories and collections</h3>
+<p>On the left is the list of categories with the number of books. Clicking a category shows its <b>collections</b> (series and multi-volume works) underneath, ordered by volume number. On a phone, categories and collections are two drop-down menus above the list.</p>
+<p class="tip">Category names are in Spanish because they are the names of the folders on disk.</p>
+<h3 id="g-temi">4. Themes</h3>
+<p>Click <b>▸ Themes</b> below the search box to see the themes (Prayer, Marriage, Spiritual warfare, End times…). You can choose more than one: books that have all of them are shown. The themes under each book can be clicked too.</p>
+<p class="tip">Themes are assigned automatically from the title and the prologue, so not every book has one. If a theme is not enough, use the free search as well.</p>
+<h3 id="g-scheda">5. The book card</h3>
+<ul>
+<li><b>Title and author</b>, then collection, number of pages (or the label <b>EPUB</b>) and <b>ISBN</b>: one click on the ISBN selects it for copying.</li>
+<li><b>Barcode</b> (on the right, only for books with an ISBN): the EAN-13 found on the back of books. One click enlarges it so it can be read with a barcode scanner or a phone; another click makes it small again.</li>
+<li><b>Prologue</b>: the beginning of the Foreword, Preface or Introduction. If the book has none, the <b>beginning of the book</b> is shown. <b>Read more</b> opens it in full.</li>
+<li><b>Open PDF / Open EPUB</b> opens the book. <b>Go to prologue</b> (PDF only) opens the PDF at the right page.</li>
+<li>For scanned PDFs without text the prologue is not available, but the book opens normally.</li>
+</ul>
+<h3 id="g-miei">6. My section: favourites, reading, read</h3>
+<ul>
+<li>At the bottom of every book card there are three buttons: <b>☆ Favourite</b>, <b>📖 Reading</b> and <b>✓ Read</b>. One click marks the book (the button turns coloured), another click removes the mark.</li>
+<li>On the left, above the categories, <b>My section</b> shows the three lists with the number of books: one click opens the list, with no need to search for the books. On a phone the lists are in the first drop-down menu.</li>
+<li>When you mark a book as <b>Read</b>, it leaves <b>Reading now</b>. A book can be a Favourite and also being read or read.</li>
+<li>Search, themes and the ISBN filter also work inside a list.</li>
+</ul>
+<p class="tip">The lists are saved in this browser, on this computer. To take them elsewhere use <b>⚙ Settings → My section → Export</b>, then <b>Import</b> on the other computer. It is a good idea to export them now and then as a backup too.</p>
+<h3 id="g-imp">7. Settings (⚙)</h3>
+<p><b>Appearance</b> — changes apply immediately:</p>
+<ul>
+<li><b>Language</b>: Italian, English or Spanish (same as the IT · EN · ES buttons).</li>
+<li><b>Theme</b>: Automatic (follows your computer's light/dark mode), Light, Dark, Sepia (paper colour, restful) and High contrast (black and yellow).</li>
+<li><b>Text</b>: Normal, Large, Extra large.</li>
+<li><b>Cards</b>: Normal (start of the prologue), Full prologue (always open), Compact (title, author and details only: handy for browsing many books).</li>
+</ul>
+<p><b>Location of the books</b> — only needed if the books are somewhere other than <code>Catalogo.html</code>:</p>
+<ul>
+<li>Type the folder that contains the categories, for example <code>E:\\Biblioteca</code> or <code>\\\\NAS\\libri\\Biblioteca</code>.</li>
+<li><b>Try with a book</b> opens a PDF to check the path is right. Then press <b>Save</b>.</li>
+<li><b>Reset</b> empties the field: books open again from the page's own folder.</li>
+</ul>
+<p class="tip">All settings are saved in the browser of that computer. On another computer or browser they must be chosen again.</p>
+<h3 id="g-sposta">8. Moving the library or using it on another computer</h3>
+<p>If you copy or move the <b>whole</b> library folder (with <code>Catalogo.html</code> inside) to another drive, a USB stick or another computer, the catalogue keeps working with no changes. Only if you keep the page and the books in different places do you need to set the folder in Settings.</p>
+<h3 id="g-faq">9. Frequently asked questions</h3>
+<ul>
+<li><b>Clicking "Open" does nothing or the file is not found.</b> The page is not in the books folder: set the folder in ⚙ Settings → Location of the books.</li>
+<li><b>EPUB files do not open in the browser.</b> That is normal: you need an ebook program (for example Calibre or Thorium Reader) or an e-reader. The browser opens them with that program or downloads them.</li>
+<li><b>A book has no prologue.</b> It is a scan without text, or the prologue is not in the first pages: open the book.</li>
+<li><b>I added new books but they do not appear.</b> The catalogue must be regenerated by whoever manages the library: in the Biblioteca program, step <b>Catalog and Excel</b> → <b>Update the catalog</b>.</li>
+<li><b>My favourites have disappeared.</b> The lists are saved in the browser: with another browser, another computer or after clearing browsing data they are not there. Restore them with <b>Import</b> from the exported file.</li>
+</ul>`,
+  es: `
+<nav class="gtoc"><a href="#g-apri">Abrir</a><a href="#g-cerca">Buscar</a><a href="#g-cat">Categorías</a><a href="#g-temi">Temas</a><a href="#g-scheda">Ficha del libro</a><a href="#g-miei">Mi sección</a><a href="#g-imp">Ajustes</a><a href="#g-sposta">Mover la Biblioteca</a><a href="#g-faq">Preguntas frecuentes</a></nav>
+<h3 id="g-apri">1. Abrir el catálogo</h3>
+<p>Haz doble clic en <b>Catalogo.html</b>, en la carpeta de la Biblioteca. Se abre en el navegador (Chrome, Edge, Firefox) y funciona <b>sin internet</b>. Con muchos libros puede tardar unos segundos.</p>
+<p>Arriba a la derecha encontrarás: <b>IT · EN · ES</b> para cambiar el idioma, <b>? Guía</b> (esta página) y <b>⚙ Ajustes</b>.</p>
+<h3 id="g-cerca">2. Buscar un libro</h3>
+<ul>
+<li>Escribe en el cuadro de búsqueda: título, autor, ISBN o palabras que aparecen en el prólogo.</li>
+<li>Los acentos no importan: <i>oracion</i> también encuentra <i>oración</i>.</li>
+<li>Con varias palabras solo aparecen los libros que las contienen <b>todas</b> (p. ej. <i>matrimonio feliz</i>).</li>
+<li>El menú junto al cuadro limita la búsqueda a <b>Título</b>, <b>Autor</b>, <b>Prólogo</b> o <b>ISBN</b>. El ISBN se puede escribir con o sin guiones.</li>
+<li>El menú <b>Todos los libros / Con ISBN / Sin ISBN</b>, encima de la lista a la derecha, muestra solo los libros que tienen (o no tienen) ISBN.</li>
+<li>Las palabras encontradas se resaltan en amarillo. <b>Quitar filtros</b> borra la búsqueda, la categoría, el filtro ISBN y los temas.</li>
+</ul>
+<h3 id="g-cat">3. Categorías y colecciones</h3>
+<p>A la izquierda está la lista de categorías con el número de libros. Al hacer clic en una categoría aparecen debajo sus <b>colecciones</b> (series y obras en varios tomos), ordenadas por número de tomo. En el teléfono, categorías y colecciones son dos menús desplegables encima de la lista.</p>
+<p class="tip">Los nombres de las categorías están en español porque son los nombres de las carpetas en el disco.</p>
+<h3 id="g-temi">4. Temas</h3>
+<p>Haz clic en <b>▸ Temas</b> debajo de la búsqueda para ver los temas (Oración, Matrimonio, Guerra espiritual, Fin de los tiempos…). Puedes elegir más de uno: aparecen los libros que los tienen todos. También se puede hacer clic en los temas que aparecen bajo cada libro.</p>
+<p class="tip">Los temas se asignan automáticamente a partir del título y del prólogo, así que no todos los libros tienen uno. Si un tema no basta, usa también la búsqueda libre.</p>
+<h3 id="g-scheda">5. La ficha de un libro</h3>
+<ul>
+<li><b>Título y autor</b>, luego colección, número de páginas (o la etiqueta <b>EPUB</b>) e <b>ISBN</b>: un clic en el ISBN lo selecciona para copiarlo.</li>
+<li><b>Código de barras</b> (a la derecha, solo en los libros con ISBN): es el EAN-13 que aparece en la contratapa de los libros. Un clic lo amplía para leerlo con un lector de códigos de barras o con el teléfono; otro clic lo reduce.</li>
+<li><b>Prólogo</b>: el comienzo del Prólogo, Prefacio o Introducción. Si el libro no tiene, aparece el <b>inicio del libro</b>. <b>Leer todo</b> lo abre completo.</li>
+<li><b>Abrir PDF / Abrir EPUB</b> abre el libro. <b>Ir al prólogo</b> (solo PDF) abre el PDF en la página correcta.</li>
+<li>En los PDF escaneados sin texto el prólogo no está disponible, pero el libro se abre normalmente.</li>
+</ul>
+<h3 id="g-miei">6. Mi sección: favoritos, leyendo, leídos</h3>
+<ul>
+<li>Al final de la ficha de cada libro hay tres botones: <b>☆ Favorito</b>, <b>📖 Leyendo</b> y <b>✓ Leído</b>. Un clic marca el libro (el botón se colorea), otro clic quita la marca.</li>
+<li>A la izquierda, encima de las categorías, <b>Mi sección</b> muestra las tres listas con el número de libros: un clic abre la lista, sin tener que buscar los libros. En el teléfono las listas están en el primer menú desplegable.</li>
+<li>Al marcar un libro como <b>Leído</b>, sale de <b>Leyendo</b>. Un libro puede ser Favorito y a la vez estar en lectura o leído.</li>
+<li>Dentro de una lista también funcionan la búsqueda, los temas y el filtro ISBN.</li>
+</ul>
+<p class="tip">Las listas quedan guardadas en este navegador, en este ordenador. Para llevarlas a otro sitio usa <b>⚙ Ajustes → Mi sección → Exportar</b> y luego <b>Importar</b> en el otro ordenador. Conviene exportarlas de vez en cuando también como copia de seguridad.</p>
+<h3 id="g-imp">7. Ajustes (⚙)</h3>
+<p><b>Apariencia</b> — los cambios se ven al instante:</p>
+<ul>
+<li><b>Idioma</b>: italiano, inglés o español (igual que los botones IT · EN · ES).</li>
+<li><b>Tema</b>: Automático (sigue el modo claro/oscuro del ordenador), Claro, Oscuro, Sepia (color papel, descansa la vista) y Alto contraste (negro y amarillo).</li>
+<li><b>Texto</b>: Normal, Grande, Muy grande.</li>
+<li><b>Fichas</b>: Normales (inicio del prólogo), Prólogo completo (siempre abierto), Compactas (solo título, autor y datos: cómodas para recorrer muchos libros).</li>
+</ul>
+<p><b>Ubicación de los libros</b> — solo hace falta si los libros están en un lugar distinto de <code>Catalogo.html</code>:</p>
+<ul>
+<li>Escribe la carpeta que contiene las categorías, por ejemplo <code>E:\\Biblioteca</code> o <code>\\\\NAS\\libri\\Biblioteca</code>.</li>
+<li><b>Probar con un libro</b> abre un PDF para comprobar que la ruta es correcta. Después pulsa <b>Guardar</b>.</li>
+<li><b>Restablecer</b> vacía el campo: los libros vuelven a abrirse desde la carpeta de la página.</li>
+</ul>
+<p class="tip">Todos los ajustes quedan guardados en el navegador de ese ordenador. En otro ordenador o navegador hay que elegirlos de nuevo.</p>
+<h3 id="g-sposta">8. Mover la Biblioteca o usarla en otro ordenador</h3>
+<p>Si copias o mueves <b>toda</b> la carpeta de la Biblioteca (con <code>Catalogo.html</code> dentro) a otro disco, una memoria USB u otro ordenador, el catálogo sigue funcionando sin cambiar nada. Solo si tienes la página y los libros en lugares distintos hay que indicar la carpeta en Ajustes.</p>
+<h3 id="g-faq">9. Preguntas frecuentes</h3>
+<ul>
+<li><b>Al pulsar "Abrir" no pasa nada o no se encuentra el archivo.</b> La página no está en la carpeta de los libros: indica la carpeta en ⚙ Ajustes → Ubicación de los libros.</li>
+<li><b>Los EPUB no se abren en el navegador.</b> Es normal: hace falta un programa de libros electrónicos (por ejemplo Calibre o Thorium Reader) o un lector de e-books. El navegador los abre con ese programa o los descarga.</li>
+<li><b>Un libro no tiene prólogo.</b> Es un escaneo sin texto o el prólogo no está en las primeras páginas: abre el libro.</li>
+<li><b>Añadí libros nuevos pero no aparecen.</b> Quien administra la Biblioteca debe regenerar el catálogo: en el programa Biblioteca, paso <b>Catálogo y Excel</b> → <b>Actualizar el catálogo</b>.</li>
+<li><b>Mis favoritos han desaparecido.</b> Las listas se guardan en el navegador: con otro navegador, otro ordenador o después de borrar los datos de navegación no están. Recupéralas con <b>Importar</b> desde el archivo exportado.</li>
+</ul>`,
+};
+
+// ===================== lingua =====================
+const LANG_KEY = "catalogoBiblioteca.lingua";
+function detectLang() {
+  const saved = store.get(LANG_KEY);
+  if (saved && T[saved]) return saved;
+  const nav = (navigator.language || "it").slice(0, 2).toLowerCase();
+  return T[nav] ? nav : "it";
+}
+let LANG = detectLang();
+const t = k => T[LANG][k];
+const temaName = i => TEMI[i][LANG];
+const nf = n => n.toLocaleString({ it: "it-IT", en: "en-GB", es: "es-ES" }[LANG]);
+
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.title = t("title");
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => { el.title = t(el.dataset.i18nTitle); el.setAttribute("aria-label", t(el.dataset.i18nTitle)); });
+  document.querySelectorAll("[data-lang]").forEach(b => b.classList.toggle("on", b.dataset.lang === LANG));
+  $("aLingua").value = LANG;
+  $("tot").textContent = t("tot")(nf(LIBRI.length), cats.size);
+  const fo = $("fIsbn").options;
+  fo[0].textContent = t("isbnAll")(nf(LIBRI.length));
+  fo[1].textContent = t("isbnYes")(nf(N_ISBN));
+  fo[2].textContent = t("isbnNo")(nf(LIBRI.length - N_ISBN));
+  if ($("cfg").open) cfgPreview();
+}
+function setLang(l) {
+  if (!T[l] || l === LANG) return;
+  LANG = l; store.set(LANG_KEY, l);
+  applyLang(); update(false, true);
+  if ($("guide").open) showGuide(l);
+}
+document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+$("aLingua").addEventListener("change", e => setLang(e.target.value));
+
+// ===================== impostazioni: cartella dei libri =====================
+const CFG_KEY = "catalogoBiblioteca.cartella";
+const cfgGet = () => store.get(CFG_KEY) || "";
+const enc = p => p.split("/").map(encodeURIComponent).join("/");
+function baseUrl(dir) {
+  // trasforma un percorso scritto a mano in un indirizzo file:// (o lo lascia se e' gia' un indirizzo)
+  dir = (dir || "").trim().replace(/^["']|["']$/g, "");
+  if (!dir) return "";
+  if (/^(file|https?):\/\//i.test(dir)) return dir.replace(/\/+$/, "") + "/";
+  let p = dir.replace(/\\/g, "/").replace(/\/+$/, "");
+  if (p.startsWith("//")) return "file:" + "//" + enc(p.slice(2)) + "/";          // \\server\cartella
+  if (/^[a-z]:/i.test(p)) return "file:///" + p.slice(0, 2) + enc(p.slice(2)) + "/"; // C:\cartella
+  if (p.startsWith("/")) return "file://" + enc(p) + "/";                          // Mac / Linux
+  return enc(p) + "/";                                                             // percorso relativo
+}
+let BASE = baseUrl(cfgGet());
+const href = p => BASE + enc(p);
+
+LIBRI.forEach(b => {
+  b.nt = norm(b.t); b.na = norm(b.a); b.nx = norm(b.x); b.ni = b.i.join(" ").toLowerCase();
+  // i nomi dei temi in tutte e tre le lingue, cosi' la ricerca li trova in qualsiasi lingua
+  b.all = norm([b.t, b.a, b.c, b.k, b.x, b.h.map(i => Object.values(TEMI[i]).join(" ")).join(" "), b.ni].join(" "));
+  b.e13 = b.i.length ? isbn13(b.i[0]) : "";
+});
+const N_ISBN = LIBRI.filter(b => b.e13).length;
+
+// ===================== codice a barre EAN-13 (quello sul retro dei libri) =====================
+function isbn13(d) {
+  if (d.length === 13) return d;
+  const core = "978" + d.slice(0, 9);
+  const s = [...core].reduce((a, c, i) => a + (+c) * (i % 2 ? 3 : 1), 0);
+  return core + (10 - s % 10) % 10;
+}
+const EAN_L = ["0001101", "0011001", "0010011", "0111101", "0100011", "0110001", "0101111", "0111011", "0110111", "0001011"];
+const EAN_R = EAN_L.map(c => [...c].map(x => x === "0" ? "1" : "0").join(""));
+const EAN_G = EAN_R.map(c => [...c].reverse().join(""));
+const EAN_P = ["LLLLLL", "LLGLGG", "LLGGLG", "LLGGGL", "LGLLGG", "LGGLLG", "LGGGLL", "LGLGLG", "LGLGGL", "LGGLGL"];
+function ean13svg(code) {
+  let bits = "101";
+  for (let k = 0; k < 6; k++) bits += (EAN_P[+code[0]][k] === "L" ? EAN_L : EAN_G)[+code[1 + k]];
+  bits += "01010";
+  for (let k = 0; k < 6; k++) bits += EAN_R[+code[7 + k]];
+  bits += "101";
+  const Q = 9, W = Q + 95 + 7, guard = i => i < 3 || (i >= 45 && i < 50) || i >= 92;
+  let r = "";
+  for (let i = 0; i < 95; i++) {
+    if (bits[i] !== "1") continue;
+    let j = i; while (j + 1 < 95 && bits[j + 1] === "1" && guard(j + 1) === guard(i)) j++;
+    r += `<rect x="${Q + i}" y="0" width="${j - i + 1}" height="${guard(i) ? 55 : 50}"/>`;
+    i = j;
+  }
+  const tx = (x, s, a) => `<text x="${x}" y="63" text-anchor="${a}">${s}</text>`;
+  return `<svg viewBox="0 0 ${W} 65" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ISBN ${code}">` +
+    `<rect width="${W}" height="65" fill="#fff"/><g fill="#000">${r}</g>` +
+    `<g font-family="Consolas, 'Courier New', monospace" font-size="9" letter-spacing="1.2" fill="#000">` +
+    tx(Q - 1.5, code[0], "end") + tx(Q + 24, code.slice(1, 7), "middle") + tx(Q + 71, code.slice(7), "middle") + `</g></svg>`;
+}
+
+const state = { q: "", field: "all", cat: "", coll: "", isbn: "", my: "", temi: new Set() };
+
+// ===================== la mia sezione: preferiti, in lettura, letti =====================
+// salvati nel browser per percorso del libro; i percorsi che non sono piu' nel catalogo
+// restano salvati (tornano visibili se il libro ricompare) ma non vengono contati
+const MY_KEY = "catalogoBiblioteca.miei";
+const MY_LISTS = { fav: ["★", "myFav", "mkFav", "tFav"], read: ["📖", "myRead", "mkRead", "tRead"], done: ["✓", "myDone", "mkDone", "tDone"] };
+const MY = {};
+(function myLoad() {
+  let d = {};
+  try { d = JSON.parse(store.get(MY_KEY) || "{}"); } catch (e) { d = {}; }
+  for (const k in MY_LISTS) MY[k] = new Set(Array.isArray(d[k]) ? d[k] : []);
+})();
+const mySave = () => store.set(MY_KEY, JSON.stringify(Object.fromEntries(Object.keys(MY_LISTS).map(k => [k, [...MY[k]]]))));
+const PATHS = new Set(LIBRI.map(b => b.p));
+const myCount = k => [...MY[k]].filter(p => PATHS.has(p)).length;
+function myToggle(k, p) {
+  if (MY[k].has(p)) MY[k].delete(p);
+  else {
+    MY[k].add(p);
+    if (k === "done") MY.read.delete(p);  // finito di leggere: esce da "Sto leggendo"
+    if (k === "read") MY.done.delete(p);  // lo rileggo
+  }
+  mySave();
+}
+function myButtons(p) {
+  return Object.entries(MY_LISTS).map(([k, [ic, , lab, tip]]) => {
+    const on = MY[k].has(p);
+    return `<button class="mk ${on ? "on" : ""}" data-mk="${k}" aria-pressed="${on}" title="${esc(t(tip))}">${k === "fav" && !on ? "☆" : ic} ${t(lab)}</button>`;
+  }).join("");
+}
+let results = [], shown = 0;
+const PAGE = 60;
+
+// ===================== categorie e collezioni =====================
+const cats = new Map();
+LIBRI.forEach(b => {
+  if (!cats.has(b.c)) cats.set(b.c, { n: 0, colls: new Map() });
+  const c = cats.get(b.c); c.n++;
+  if (b.k) c.colls.set(b.k, (c.colls.get(b.k) || 0) + 1);
+});
+
+function renderNav() {
+  $("mine").innerHTML = Object.entries(MY_LISTS).map(([k, [ic, lab]]) =>
+    `<button class="cat ${state.my === k ? "on" : ""}" data-my="${k}"><span><span class="ic">${ic}</span>${t(lab)}</span><span class="n">${nf(myCount(k))}</span></button>`).join("");
+  let h = `<button class="cat ${!state.cat && !state.my ? "on" : ""}" data-cat=""><span>${t("all")}</span><span class="n">${nf(LIBRI.length)}</span></button>`;
+  for (const [name, c] of cats) {
+    h += `<button class="cat ${state.cat === name ? "on" : ""}" data-cat="${esc(name)}"><span>${esc(name)}</span><span class="n">${nf(c.n)}</span></button>`;
+    if (state.cat === name && c.colls.size) {
+      h += `<div class="colls"><button class="cat ${!state.coll ? "on" : ""}" data-cat="${esc(name)}" data-coll=""><span>${t("allColl")}</span></button>`;
+      for (const [k, n] of [...c.colls].sort((a, b) => a[0].localeCompare(b[0], "es")))
+        h += `<button class="cat ${state.coll === k ? "on" : ""}" data-cat="${esc(name)}" data-coll="${esc(k)}"><span>${esc(k)}</span><span class="n">${n}</span></button>`;
+      h += `</div>`;
+    }
+  }
+  $("cats").innerHTML = h;
+  // versione mobile
+  $("mCat").innerHTML = `<option value="">${t("allCats")}</option>` +
+    `<optgroup label="${esc(t("mine"))}">` + Object.entries(MY_LISTS).map(([k, [ic, lab]]) =>
+      `<option ${state.my === k ? "selected" : ""} value="my:${k}">${ic} ${t(lab)} (${myCount(k)})</option>`).join("") + `</optgroup>` +
+    `<optgroup label="${esc(t("categories"))}">` +
+    [...cats].map(([n, c]) => `<option ${state.cat === n ? "selected" : ""} value="${esc(n)}">${esc(n)} (${c.n})</option>`).join("") + `</optgroup>`;
+  const cc = state.cat ? cats.get(state.cat).colls : new Map();
+  $("mColl").hidden = !cc.size;
+  $("mColl").innerHTML = `<option value="">${t("allColls")}</option>` +
+    [...cc].sort((a, b) => a[0].localeCompare(b[0], "es")).map(([k, n]) => `<option ${state.coll === k ? "selected" : ""} value="${esc(k)}">${esc(k)} (${n})</option>`).join("");
+}
+$("cats").addEventListener("click", e => {
+  const b = e.target.closest(".cat"); if (!b) return;
+  state.cat = b.dataset.cat; state.coll = b.dataset.coll || ""; state.my = "";
+  update(true);
+});
+$("mine").addEventListener("click", e => {
+  const b = e.target.closest(".cat"); if (!b) return;
+  state.my = state.my === b.dataset.my ? "" : b.dataset.my; state.cat = ""; state.coll = "";
+  update(true);
+});
+$("mCat").addEventListener("change", e => {
+  const v = e.target.value;
+  if (v.startsWith("my:")) { state.my = v.slice(3); state.cat = ""; } else { state.my = ""; state.cat = v; }
+  state.coll = ""; update(true);
+});
+$("mColl").addEventListener("change", e => { state.coll = e.target.value; update(true); });
+
+// ===================== temi =====================
+const temaCount = TEMI.map((_, i) => LIBRI.filter(b => b.h.includes(i)).length);
+function renderChips() {
+  $("chips").innerHTML = TEMI.map((_, i) => i).sort((a, b) => temaName(a).localeCompare(temaName(b), LANG))
+    .map(i => `<button class="chip ${state.temi.has(i) ? "on" : ""}" data-t="${i}">${esc(temaName(i))}<span>${temaCount[i]}</span></button>`).join("");
+  $("themesSel").textContent = "· " + (state.temi.size ? [...state.temi].map(temaName).join(", ") : t("themesPick"));
+}
+$("themesToggle").addEventListener("click", () => {
+  const open = $("chips").hidden; $("chips").hidden = !open;
+  $("themesToggle").setAttribute("aria-expanded", open);
+  $("themesArrow").textContent = open ? "▾ " : "▸ ";
+  setHdr();
+});
+function toggleTema(i) { state.temi.has(i) ? state.temi.delete(i) : state.temi.add(i); update(true); }
+$("chips").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) toggleTema(+c.dataset.t); });
+
+// ===================== ricerca =====================
+let timer;
+$("q").addEventListener("input", e => { clearTimeout(timer); timer = setTimeout(() => { state.q = e.target.value; update(true); }, 150); });
+$("field").addEventListener("change", e => { state.field = e.target.value; update(true); });
+$("fIsbn").addEventListener("change", e => { state.isbn = e.target.value; update(true); });
+$("reset").addEventListener("click", () => {
+  Object.assign(state, { q: "", cat: "", coll: "", field: "all", isbn: "", my: "" }); state.temi.clear();
+  $("q").value = ""; $("field").value = "all"; $("fIsbn").value = ""; update(true);
+});
+
+const VOC = { a: "aáàâä", e: "eéèêë", i: "iíìîï", o: "oóòôö", u: "uúùûü", n: "nñ", c: "cç" };
+function accentRx(tok) {
+  return tok.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/[aeiounc]/g, ch => `[${VOC[ch]}${VOC[ch].toUpperCase()}]`);
+}
+function highlight(text, tokens) {
+  let h = esc(text);
+  if (!tokens.length) return h;
+  const rx = new RegExp("(" + tokens.map(accentRx).join("|") + ")", "gi");
+  return h.replace(/(<[^>]*>)|([^<]+)/g, (m, tag, txt) => tag || txt.replace(rx, "<mark>$1</mark>"));
+}
+function snippet(b, tokens) {
+  // durante una ricerca nel prologo mostra il pezzo dove compare la parola
+  if (!tokens.length || !b.x) return b.x;
+  const i = Math.min(...tokens.map(t => b.nx.indexOf(t)).filter(i => i >= 0));
+  if (!isFinite(i) || i < 220) return b.x;
+  const start = b.x.lastIndexOf(" ", i - 160);
+  return "… " + b.x.slice(start + 1);
+}
+
+function update(reset, keepScroll) {
+  const tokens = norm(state.q).split(/\s+/).filter(t => t.length > 1)
+    .map(t => /^[\d-]+x?$/.test(t) ? t.replace(/-/g, "") : t);  // ISBN scritto con i trattini
+  const key = { all: "all", t: "nt", a: "na", x: "nx", i: "ni" }[state.field];
+  results = LIBRI.filter(b =>
+    (!state.cat || b.c === state.cat) && (!state.coll || b.k === state.coll) &&
+    (!state.isbn || (state.isbn === "si") === !!b.e13) &&
+    (!state.my || MY[state.my].has(b.p)) &&
+    [...state.temi].every(i => b.h.includes(i)) &&
+    tokens.every(t => b[key].includes(t)));
+  state.tokens = tokens;
+  renderNav(); renderChips();
+  const filtri = state.q || state.cat || state.isbn || state.my || state.temi.size;
+  const vuoto = state.my && !state.q && !state.isbn && !state.temi.size ? t("myEmpty") : t("empty");
+  $("reset").hidden = !filtri;
+  $("count").innerHTML = t("count")(nf(results.length), results.length === 1, !!filtri);
+  if (keepScroll) {
+    // cambio di lingua: ridisegna le schede gia' mostrate senza tornare in cima
+    const n = shown; shown = 0; $("list").innerHTML = "";
+    if (!results.length) { $("moreBtn").hidden = true; $("list").innerHTML = `<div class="empty">${vuoto}</div>`; return; }
+    more(Math.max(n, PAGE));
+    return;
+  }
+  if (reset) { $("list").innerHTML = ""; shown = 0; window.scrollTo({ top: 0 }); }
+  if (!results.length) { $("moreBtn").hidden = true; $("list").innerHTML = `<div class="empty">${vuoto}</div>`; return; }
+  more();
+}
+
+function card(b, tokens) {
+  const tipo = T[LANG].pro[b.y] || b.y;
+  let pro;
+  const fmt = (b.p.match(/\.(\w+)$/) || [, "pdf"])[1].toUpperCase();
+  const pdf = fmt === "PDF";  // numeri di pagina e #page= hanno senso solo nei PDF
+  if (b.x) pro = `<span class="lab">${esc(tipo)}${b.g && pdf ? ` · ${t("pageAbbr")} ${b.g}` : ""}</span><p>${highlight(snippet(b, tokens), tokens)}</p>`;
+  else if (b.s === "scansione") pro = `<p class="none">${t("scan")}</p>`;
+  else pro = `<p class="none">${t("noPro")}</p>`;
+  const meta = [b.k && !state.coll ? esc(b.k) : "", pdf ? (b.n ? t("pages")(nf(b.n)) : "") : `<span class="fmt">${fmt}</span>`,
+    b.i.length ? `<span class="isbn">ISBN ${b.i.map(x => highlight(x, tokens)).join(" · ")}</span>` : ""].filter(Boolean);
+  return `<article class="book" data-p="${esc(b.p)}">
+    ${b.e13 ? `<div class="bc" title="${esc(t("bcZoom"))}">${ean13svg(b.e13)}</div>` : ""}
+    <h3>${highlight(b.t, tokens)}</h3>
+    <div class="by">${b.a ? highlight(b.a, tokens) : t("noAuthor")}</div>
+    ${meta.length ? `<div class="meta">${meta.map(m => `<span>${m}</span>`).join("")}</div>` : ""}
+    ${b.h.length ? `<div class="tags">${b.h.map(i => `<button class="tag" data-t="${i}">${esc(temaName(i))}</button>`).join("")}</div>` : ""}
+    <div class="pro">${pro}</div>
+    <div class="actions">
+      <a href="${href(b.p)}" target="_blank">${t("open")(fmt)}</a>
+      ${b.x && b.g && pdf ? `<a href="${href(b.p)}#page=${b.g}" target="_blank">${t("goPro")}</a>` : ""}
+      ${b.x && b.x.length > 280 ? `<button class="more-btn">${t("readAll")}</button>` : ""}
+      <span class="mks">${myButtons(b.p)}</span>
+    </div>
+  </article>`;
+}
+
+function more(count) {
+  const tokens = state.tokens, list = $("list");
+  const end = Math.min(results.length, shown + (count || PAGE));
+  let h = "", prev = shown ? results[shown - 1] : null;
+  for (let j = shown; j < end; j++) {
+    const b = results[j];
+    if (!prev || prev.c !== b.c || prev.k !== b.k) {
+      const n = results.filter(r => r.c === b.c && r.k === b.k).length;
+      h += `<h2 class="group">${esc(b.c)}${b.k ? ` <span class="sep">›</span> ${esc(b.k)}` : ""}<small>${n}</small></h2>`;
+    }
+    h += card(b, tokens); prev = b;
+  }
+  list.insertAdjacentHTML("beforeend", h);
+  shown = end;
+  const left = results.length - shown;
+  $("moreBtn").hidden = left <= 0;
+  $("moreBtn").textContent = t("more")(Math.min(PAGE, left), nf(left));
+}
+$("moreBtn").addEventListener("click", () => more());
+new IntersectionObserver(es => { if (es[0].isIntersecting && shown && shown < results.length) more(); }, { rootMargin: "800px" }).observe($("more"));
+
+$("list").addEventListener("click", e => {
+  const tg = e.target.closest(".tag");
+  if (tg) { toggleTema(+tg.dataset.t); return; }
+  const bc = e.target.closest(".bc");
+  if (bc) { bc.classList.toggle("big"); return; }
+  const mk = e.target.closest(".mk");
+  if (mk) {
+    // aggiorna solo i pulsanti e i contatori: la scheda resta al suo posto anche dentro una lista
+    const art = mk.closest(".book");
+    myToggle(mk.dataset.mk, art.dataset.p);
+    art.querySelector(".mks").innerHTML = myButtons(art.dataset.p);
+    renderNav();
+    return;
+  }
+  const m = e.target.closest(".more-btn");
+  if (m) { const p = m.closest(".book").querySelector(".pro"); p.classList.toggle("open"); m.textContent = p.classList.contains("open") ? t("less") : t("readAll"); }
+});
+
+// ===================== finestra impostazioni =====================
+const cfg = $("cfg");
+function cfgPreview() {
+  const v = $("base").value.trim();
+  $("cfgNow").innerHTML = v ? `${t("nowSet")}<br><b>${esc(baseUrl(v))}</b>` : t("nowEmpty");
+  $("myNow").innerHTML = t("myCount")(myCount("fav"), myCount("read"), myCount("done"));
+}
+
+// esporta / importa la mia sezione (per un altro PC o browser)
+$("myExport").addEventListener("click", () => {
+  const d = { tipo: "catalogoBiblioteca.miei", versione: 1, data: new Date().toISOString().slice(0, 10) };
+  for (const k in MY_LISTS) d[k] = [...MY[k]];
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(d, null, 1)], { type: "application/json" }));
+  a.download = `biblioteca_la_mia_sezione_${d.data}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+});
+$("myImport").addEventListener("click", () => $("myFile").click());
+$("myFile").addEventListener("change", async e => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  let d;
+  try { d = JSON.parse(await f.text()); } catch (err) { d = null; }
+  if (!d || d.tipo !== "catalogoBiblioteca.miei") { alert(t("importBad")); return; }
+  const added = {};
+  for (const k in MY_LISTS) {
+    added[k] = 0;
+    for (const p of Array.isArray(d[k]) ? d[k] : []) if (typeof p === "string" && !MY[k].has(p)) { MY[k].add(p); added[k]++; }
+  }
+  for (const p of MY.done) MY.read.delete(p);  // un libro letto non resta anche "in lettura"
+  mySave(); cfgPreview(); update(false, true);
+  alert(t("importOk")(added.fav, added.read, added.done));
+});
+const LOOK_KEY = "catalogoBiblioteca.aspetto";
+const LOOK = { tema: ["aTema", "theme", "auto"], testo: ["aTesto", "size", "m"], vista: ["aVista", "view", "normal"] };
+function lookGet() { try { return JSON.parse(store.get(LOOK_KEY) || "{}"); } catch (e) { return {}; } }
+function lookApply(a) {
+  for (const [k, [, attr, def]] of Object.entries(LOOK)) {
+    if (a[k] && a[k] !== def) document.documentElement.dataset[attr] = a[k];
+    else delete document.documentElement.dataset[attr];
+  }
+}
+for (const [k, [id]] of Object.entries(LOOK)) {
+  $(id).addEventListener("change", e => {
+    const a = lookGet(); a[k] = e.target.value; lookApply(a);
+    store.set(LOOK_KEY, JSON.stringify(a));
+  });
+}
+$("openCfg").addEventListener("click", () => {
+  const a = lookGet();
+  for (const [k, [id, , def]] of Object.entries(LOOK)) $(id).value = a[k] || def;
+  $("aLingua").value = LANG;
+  $("base").value = cfgGet(); cfgPreview(); cfg.showModal();
+});
+$("base").addEventListener("input", cfgPreview);
+$("cfgCancel").addEventListener("click", () => cfg.close());
+$("cfgClear").addEventListener("click", () => { $("base").value = ""; cfgPreview(); });
+$("cfgTest").addEventListener("click", () => {
+  const b = LIBRI.find(x => x.p.toLowerCase().endsWith(".pdf"));
+  window.open(baseUrl($("base").value) + enc(b.p), "_blank");
+});
+$("cfgForm").addEventListener("submit", () => {
+  const v = $("base").value.trim();
+  if (!store.set(CFG_KEY, v) && v) alert(t("saveFail"));
+  BASE = baseUrl(v);
+  update(true);
+});
+
+// ===================== guida =====================
+function showGuide(l) {
+  $("guideBody").innerHTML = GUIDE[l];
+  $("guideBody").scrollTop = 0;
+  $("guide").querySelector(".ghead h2").textContent = T[l].guideTitle;
+  $("guideClose").textContent = T[l].close;
+  document.querySelectorAll("[data-glang]").forEach(b => b.classList.toggle("on", b.dataset.glang === l));
+}
+$("openGuide").addEventListener("click", () => { showGuide(LANG); $("guide").showModal(); $("guide").scrollTop = 0; });
+$("guideClose").addEventListener("click", () => $("guide").close());
+document.querySelectorAll("[data-glang]").forEach(b => b.addEventListener("click", () => showGuide(b.dataset.glang)));
+$("guideBody").addEventListener("click", e => {
+  // indice della guida: scorre dentro la finestra invece di cambiare l'indirizzo della pagina
+  const a = e.target.closest(".gtoc a"); if (!a) return;
+  e.preventDefault();
+  $("guideBody").querySelector(a.getAttribute("href")).scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+function setHdr() { document.documentElement.style.setProperty("--hdr", $("hdr").offsetHeight + 12 + "px"); }
+window.addEventListener("resize", setHdr);
+applyLang(); setHdr(); update(true);
+</script>
+</body>
+</html>

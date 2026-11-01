@@ -1,0 +1,34 @@
+# Cosa NON va pubblicato
+
+# prove: chiavi, testo dei libri, dati della biblioteca personale
+prove/
+
+# appunti di lavoro con dati della biblioteca personale
+REQUISITI.md
+RISULTATI_*.md
+GUIDA_CHIAVE_GRATUITA.md
+
+# chiavi, per sicurezza ovunque
+*chiave*.txt
+chiavi.json
+.env
+
+# prodotti della costruzione (l'installer va nelle Releases di GitHub)
+installer/build/
+installer/dist/
+installer/output/
+# llama.cpp si scarica a parte (vedi README)
+installer/terzi/
+
+# modelli AI e libri
+*.gguf
+*.part
+*.pdf
+*.epub
+*.mobi
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/

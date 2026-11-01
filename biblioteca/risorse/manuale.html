@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biblioteca — Manuale</title>
+<style>
+:root { --bg:#f6f3ee; --panel:#fffdf9; --ink:#2a2622; --muted:#6f675e; --line:#e4ddd2; --accent:#7a4b1f; --soft:#f1e6d8; }
+@media (prefers-color-scheme: dark) { :root { --bg:#1b1916; --panel:#24211d; --ink:#ece6dd; --muted:#a59c90; --line:#3a352f; --accent:#e0a868; --soft:#3a2e22; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 "Segoe UI", system-ui, sans-serif; }
+header { position:sticky; top:0; background:var(--panel); border-bottom:1px solid var(--line); padding:10px 20px; display:flex; gap:14px; align-items:center; }
+header h1 { margin:0; font:600 22px "Palatino Linotype", Georgia, serif; color:var(--accent); flex:1; }
+header button { border:1px solid var(--line); background:var(--soft); color:var(--ink); padding:4px 12px; border-radius:6px; cursor:pointer; font:inherit; }
+header button.on { background:var(--accent); color:var(--panel); }
+main { max-width:860px; margin:0 auto; padding:10px 20px 60px; }
+h2 { font:600 24px "Palatino Linotype", Georgia, serif; margin:34px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+h3 { font:600 18px "Palatino Linotype", Georgia, serif; margin:22px 0 6px; }
+code { background:var(--soft); padding:1px 5px; border-radius:4px; }
+.box { background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:8px; padding:10px 16px; margin:12px 0; }
+table { border-collapse:collapse; width:100%; } td, th { border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top; }
+nav.indice a { display:block; color:var(--accent); text-decoration:none; padding:2px 0; }
+[data-lang] { display:none; } [data-lang].on { display:block; }
+</style>
+</head>
+<body>
+<header><h1>📚 Biblioteca</h1><button data-l="it">IT</button><button data-l="en">EN</button><button data-l="es">ES</button></header>
+<main>
+
+<!-- ======================================================== ITALIANO -->
+<div data-lang="it">
+<h2>Manuale</h2>
+<p>Biblioteca riordina una raccolta di libri digitali (PDF, EPUB, MOBI) in categorie e collezioni, con nomi uniformi, trova i doppioni senza mai cancellare nulla e crea un <b>catalogo</b> consultabile senza internet e un <b>elenco Excel</b> con ISBN e codici a barre.</p>
+<nav class="indice"><a href="#it-1">1. Regole di sicurezza</a><a href="#it-2">2. Installazione</a><a href="#it-3">3. Il primo riordino, passo per passo</a><a href="#it-4">4. L'intelligenza artificiale (facoltativa)</a><a href="#it-5">5. Aggiungere libri nuovi</a><a href="#it-6">6. Annullare un'esecuzione</a><a href="#it-7">7. Il catalogo e l'Excel</a><a href="#it-8">8. Impostazioni</a><a href="#it-9">9. Domande frequenti</a><a href="#it-10">10. Riservatezza e licenze</a></nav>
+
+<h2 id="it-1">1. Regole di sicurezza</h2>
+<div class="box"><ul>
+<li>Il programma <b>non cancella mai nessun file</b> e <b>non sovrascrive mai</b>: sposta e rinomina soltanto.</li>
+<li>Le <b>cartelle protette</b> non vengono mai lette, scritte o toccate.</li>
+<li>Si procede sempre così: <b>inventario → proposte → piano → simulazione → tua approvazione → esecuzione → verifica</b>.</li>
+<li>Ogni esecuzione scrive un <b>log</b> che permette di rimettere tutto come prima.</li>
+<li>Prima di ogni spostamento il programma controlla che il file sia ancora lo stesso (impronta SHA-256), che la destinazione sia libera e che il percorso non superi 250 caratteri. Se un solo controllo fallisce, non sposta niente.</li></ul></div>
+<p>Consiglio comunque una copia di sicurezza dei libri prima del primo riordino.</p>
+
+<h2 id="it-2">2. Installazione</h2>
+<p>Esegui <code>Biblioteca-Setup.exe</code> e segui le istruzioni. Il programma va in <code>Programmi\Biblioteca</code> e crea il collegamento nel menu Start. Serve Windows 10 o 11 (64 bit).</p>
+<p>Se Windows mostra «Windows ha protetto il PC», premi <b>Ulteriori informazioni → Esegui comunque</b>: succede con i programmi nuovi non ancora firmati.</p>
+<p>La <b>disinstallazione</b> (Impostazioni di Windows → App) toglie solo il programma: <b>i tuoi libri, la Biblioteca, il catalogo e i log non vengono toccati</b>.</p>
+
+<h2 id="it-3">3. Il primo riordino, passo per passo</h2>
+<h3>1. Cartelle</h3>
+<ul><li><b>Biblioteca</b>: la cartella dove andranno i libri ordinati. Può essere vuota o già ordinata.</li>
+<li><b>Cartelle da ordinare</b>: una o più cartelle con i libri in disordine (anche con sottocartelle).</li>
+<li><b>Cartelle protette</b>: per esempio i backup. Il programma non le apre mai.</li>
+<li>Copie identiche e file che non sono libri vanno in <code>_duplicati</code> e <code>_altri_file</code>, accanto alla Biblioteca (si possono cambiare).</li></ul>
+<h3>2. Inventario</h3>
+<p>Il programma legge ogni file: impronta, pagine, testo delle prime pagine, ISBN, edizione, prologo, lingua. Non sposta niente. Con molti libri ci vuole tempo (circa 8 minuti per 3600 libri): puoi premere <b>Interrompi</b> e riprendere quando vuoi, i file già letti non si rileggono. Alla fine trovi l'Excel dell'inventario.</p>
+<h3>3. Duplicati</h3>
+<ul><li><b>Copie identiche</b> (stesso file): se ne tiene una, le altre vanno in <code>_duplicati</code>.</li>
+<li><b>Già in Biblioteca</b>: stesso file, oppure stesso ISBN con titolo simile. Restano dove sono.</li>
+<li><b>Probabili doppioni</b> e <b>titoli simili</b>: solo segnalati. Decidi tu cambiando la decisione.</li></ul>
+<h3>4. Titoli con l'AI (facoltativo)</h3><p>Vedi il capitolo 4.</p>
+<h3>5. Proposte</h3>
+<p>Una tabella con un libro per riga: decisione, categoria, collezione, volume, titolo, sottotitolo, autore. Il filtro «Da controllare» mostra in cima i casi incerti.</p>
+<ul><li>La <b>categoria</b> ha tre proposte con la percentuale di sicurezza. Sopra il 70% la proposta è quasi sempre giusta (98,7% nella prova).</li>
+<li>Clicca una riga per vedere <b>copertina e prime pagine</b>; la × chiude il riquadro.</li>
+<li>Ogni modifica si salva da sola. Titoli e autori corretti a mano non vengono più cambiati dall'AI.</li>
+<li>Seleziona più righe con le caselle per cambiare insieme decisione o categoria, o per escluderle con un motivo.</li>
+<li><b>Numera la collezione</b> (nel riquadro di un libro in collezione): numeri 01, 02… dopo quelli già presenti in Biblioteca.</li></ul>
+<p>Nomi dei file: <code>Categoria\Prefisso - Titolo, sottotitolo - Autore.pdf</code>; nelle collezioni <code>Categoria\Collezione\Prefisso - Collezione 03, Titolo - Autore.pdf</code>. Se il nome esiste già si aggiunge «(otra copia)»; un nome troppo lungo perde prima il sottotitolo, poi viene accorciato.</p>
+<h3>6. Simulazione</h3>
+<p>«Costruisci il piano» mostra errori da correggere, avvisi e l'Excel del piano (prima → dopo). «Avvia la simulazione» controlla ogni operazione senza toccare niente.</p>
+<h3>7. Esecuzione e verifica</h3>
+<p>Si può eseguire solo dopo una simulazione senza problemi e dopo aver spuntato «Ho controllato il piano e lo approvo». Alla fine il programma verifica che ogni file sia arrivato con la stessa impronta.</p>
+<h3>8. Catalogo ed Excel</h3><p>Vedi il capitolo 7.</p>
+
+<h2 id="it-4">4. L'intelligenza artificiale (facoltativa)</h2>
+<p>Senza AI il programma indovina da solo circa un terzo dei titoli; con l'AI quasi quattro su cinque. L'AI riceve solo il nome del file, i metadati e le prime pagine, mai il libro intero. Puoi sempre correggere a mano.</p>
+<table><tr><th>Scelta</th><th>Costo</th><th>Account</th><th>Internet</th><th>Velocità</th></tr>
+<tr><td><b>AI sul PC</b></td><td>gratis</td><td>no</td><td>solo per scaricare il modello</td><td>5–20 s a libro</td></tr>
+<tr><td><b>Google Gemini</b></td><td>gratis (con limite al giorno)</td><td>Google, senza carta</td><td>sì</td><td>circa 7 s a libro</td></tr>
+<tr><td><b>Groq</b></td><td>gratis (con limite al giorno)</td><td>sì, senza carta</td><td>sì</td><td>pochi secondi</td></tr>
+<tr><td><b>Claude</b></td><td>a pagamento (stima mostrata prima)</td><td>Anthropic, con credito</td><td>sì</td><td>pochi secondi</td></tr></table>
+<h3>AI sul PC</h3>
+<ol><li>Scegli «AI sul PC». Il programma consiglia il modello adatto: <b>4B</b> (2,6 GB) con almeno 8 GB di memoria, altrimenti <b>2B</b> (1,2 GB).</li>
+<li>Premi <b>Scarica</b>. Se lo scaricamento si interrompe, riparte da dove era arrivato.</li>
+<li>Senza internet: copia il file del modello (<code>Qwen3.5-4B-Q4_K_M.gguf</code> o <code>Qwen3.5-2B-Q4_K_M.gguf</code>) da un altro PC su una chiavetta e usa <b>Carica da un file</b>. I modelli scaricati sono in <code>%LOCALAPPDATA%\Biblioteca\modelli</code>.</li>
+<li>Premi <b>Prova</b>, poi <b>Avvia l'AI sui titoli</b>. Si può lasciar lavorare di notte e interrompere quando si vuole.</li></ol>
+<h3>Google Gemini (gratis)</h3>
+<ol><li>Premi <b>Apri la pagina</b>: si apre aistudio.google.com.</li><li>Entra con un account Google (Gmail o telefono Android).</li>
+<li>La prima volta accetta le condizioni d'uso.</li><li>Premi <b>Create API key</b>; se chiede un progetto, scegli quello proposto.</li>
+<li>Copia la chiave (comincia con <code>AQ.</code> o <code>AIza</code>) e incollala nel programma. Se copi anche il testo intorno non importa: il programma trova la chiave da solo.</li>
+<li>Premi <b>Salva la chiave</b> e <b>Prova</b>.</li></ol>
+<p>Quando il limite gratuito del giorno finisce, il programma si ferma: il giorno dopo premi di nuovo «Avvia» e riprende da dove era arrivato. Nel livello gratuito Google può usare i testi inviati per migliorare i suoi servizi.</p>
+<h3>Groq (gratis)</h3><ol><li>Apri console.groq.com/keys ed entra con Google o con l'email.</li><li>Premi <b>Create API Key</b>, dai un nome e copia la chiave (<code>gsk_…</code>).</li><li>Incollala, salvala e prova.</li></ol>
+<h3>Claude (a pagamento)</h3><ol><li>Apri console.anthropic.com ed entra.</li><li>In <b>Billing</b> aggiungi un piccolo credito.</li><li>In <b>API keys</b> crea una chiave (<code>sk-ant-…</code>), incollala, salvala e prova.</li>
+<li>Scegli il modello: <b>claude-opus-5-5</b> (il più preciso) o <b>claude-haiku-5-5</b> (molto più economico). Prima di partire il programma mostra il costo stimato.</li></ol>
+<p>Tutte le chiavi sono salvate <b>cifrate con Windows</b>: solo il tuo utente su questo PC può leggerle. «Dimentica la chiave» la toglie.</p>
+
+<h2 id="it-5">5. Aggiungere libri nuovi</h2>
+<ol><li>Copia i libri nuovi in una cartella (per esempio <code>Libri nuovi</code>) e aspetta che la copia sia finita.</li>
+<li>Nel passo <b>Cartelle</b> metti quella cartella tra le cartelle da ordinare.</li>
+<li>Rifai i passi dall'inventario. I libri già presenti in Biblioteca vengono riconosciuti e restano nella cartella dei nuovi: non vengono importati due volte.</li>
+<li>Alla fine aggiorna catalogo ed Excel.</li></ol>
+<p>Rifare l'inventario ricalcola le proposte: le correzioni a mano non ancora eseguite si perdono (il programma lo chiede prima).</p>
+
+<h2 id="it-6">6. Annullare un'esecuzione</h2>
+<p>Nella pagina <b>Annulla un'esecuzione</b> c'è l'elenco delle esecuzioni. <b>Prova</b> dice quanti file si possono rimettere a posto; <b>Annulla davvero</b> li rimette, in ordine inverso. Se il posto di prima è occupato, quel file viene saltato e segnalato. Le cartelle rimaste vuote non vengono cancellate.</p>
+
+<h2 id="it-7">7. Il catalogo e l'Excel</h2>
+<ul><li><b>Aggiorna il catalogo</b> crea <code>Catalogo.html</code> nella Biblioteca: si apre con un doppio clic, funziona senza internet, anche sul telefono. Ricerca senza accenti, temi, ISBN con codice a barre, prologo, «La mia sezione» (preferiti, sto leggendo, letti), tre lingue, guida integrata.</li>
+<li><b>Elenco dei libri con ISBN e codici a barre</b> crea <code>Elenco_libri_ISBN.xlsx</code>: titolo, autore, edizione, ISBN e un codice a barre EAN-13 per ogni libro con ISBN, verificato rileggendolo.</li>
+<li><b>Riepilogo delle cose da decidere</b>: probabili doppioni, titoli simili, autori mancanti, libri senza testo, con la loro posizione attuale.</li></ul>
+<p>Se sposti la Biblioteca o la apri da un altro PC, nel catalogo usa ⚙ Impostazioni → Posizione dei libri.</p>
+
+<h2 id="it-8">8. Impostazioni</h2>
+<ul><li><b>Aspetto</b>: automatico, chiaro, scuro, seppia, alto contrasto.</li>
+<li><b>Sicurezza per accettare la categoria</b>: sotto questa soglia il libro finisce tra quelli da controllare.</li>
+<li><b>Categorie</b>: nome della cartella, prefisso nel nome del file, descrizione. Puoi aggiungerne, cambiarle o toglierle.</li>
+<li><b>Motivi di esclusione</b>: le voci tra cui scegliere quando decidi di non importare un libro.</li></ul>
+<p>I dati di lavoro (cache, proposte, log, Excel) sono nella cartella <code>_programma</code> dentro la Biblioteca: conviene salvarla insieme ai libri nei backup, perché i log servono per annullare.</p>
+
+<h2 id="it-9">9. Domande frequenti</h2>
+<p><b>Un libro è finito nella categoria sbagliata dopo l'esecuzione.</b> Spostalo a mano dove vuoi, poi aggiorna il catalogo; oppure annulla l'esecuzione, correggi e riesegui.</p>
+<p><b>I file .azw3 non vengono importati.</b> Sono libri Kindle che servono Calibre per essere letti: convertili in EPUB con Calibre e rimettili tra i libri nuovi.</p>
+<p><b>Un PDF è «danneggiato».</b> Il programma lo lascia dov'è e lo segnala: prova ad aprirlo; spesso è una pagina web salvata male.</p>
+<p><b>L'AI sul PC è lenta.</b> Usa il modello 2B, oppure Gemini gratuito.</p>
+<p><b>Il catalogo non apre i libri.</b> Il catalogo usa percorsi relativi: deve stare nella cartella della Biblioteca. Da un altro PC imposta la posizione dei libri nelle sue Impostazioni.</p>
+
+<h2 id="it-10">10. Riservatezza e licenze</h2>
+<p>Il programma non manda niente su internet, tranne quando scegli un'AI in cloud (Gemini, Groq, Claude): in quel caso invia nome del file, metadati e prime pagine dei libri da importare. L'AI sul PC non usa internet. Il programma usa solo librerie con licenza libera; l'elenco è nel file <code>LICENZE.txt</code> nella cartella del programma.</p>
+</div>
+
+<!-- ======================================================== ENGLISH -->
+<div data-lang="en">
+<h2>Manual</h2>
+<p>Biblioteca organizes a collection of e-books (PDF, EPUB, MOBI) into categories and collections with uniform names, finds duplicates without ever deleting anything, and creates an offline <b>catalog</b> and an <b>Excel list</b> with ISBNs and barcodes.</p>
+<nav class="indice"><a href="#en-1">1. Safety rules</a><a href="#en-2">2. Installation</a><a href="#en-3">3. The first run, step by step</a><a href="#en-4">4. Artificial intelligence (optional)</a><a href="#en-5">5. Adding new books</a><a href="#en-6">6. Undoing a run</a><a href="#en-7">7. Catalog and Excel</a><a href="#en-8">8. Settings</a><a href="#en-9">9. FAQ</a><a href="#en-10">10. Privacy and licenses</a></nav>
+<h2 id="en-1">1. Safety rules</h2>
+<div class="box"><ul><li>The program <b>never deletes any file</b> and <b>never overwrites</b>: it only moves and renames.</li><li><b>Protected folders</b> are never read, written or touched.</li>
+<li>Always: <b>inventory → proposals → plan → simulation → your approval → run → verification</b>.</li><li>Every run writes a <b>log</b> that lets you put everything back.</li>
+<li>Before each move the program checks that the file is unchanged (SHA-256), that the destination is free and that the path is at most 250 characters. If one check fails, nothing is moved.</li></ul></div>
+<p>A backup of the books before the first run is still recommended.</p>
+<h2 id="en-2">2. Installation</h2>
+<p>Run <code>Biblioteca-Setup.exe</code>. The program goes into <code>Program Files\Biblioteca</code> with a Start menu shortcut. Windows 10 or 11 (64-bit) is required. If Windows shows “Windows protected your PC”, press <b>More info → Run anyway</b>.</p>
+<p><b>Uninstalling</b> removes only the program: <b>your books, Library, catalog and logs are never touched</b>.</p>
+<h2 id="en-3">3. The first run, step by step</h2>
+<h3>1. Folders</h3><ul><li><b>Library</b>: where the organized books go (empty or already organized).</li><li><b>Folders to organize</b>: one or more folders of unorganized books.</li><li><b>Protected folders</b>: e.g. backups; never opened.</li><li>Identical copies and non-book files go to <code>_duplicati</code> and <code>_altri_file</code> next to the Library.</li></ul>
+<h3>2. Inventory</h3><p>Reads every file (fingerprint, pages, first pages, ISBN, edition, prologue, language) without moving anything. About 8 minutes for 3,600 books; you can stop and resume. An inventory Excel file is created.</p>
+<h3>3. Duplicates</h3><ul><li><b>Identical copies</b>: one is kept, the others go to <code>_duplicati</code>.</li><li><b>Already in Library</b>: same file, or same ISBN with similar title; they stay where they are.</li><li><b>Probable duplicates</b> and <b>similar titles</b>: only flagged — you decide.</li></ul>
+<h3>4. Titles with AI (optional)</h3><p>See chapter 4.</p>
+<h3>5. Proposals</h3><p>One book per row: decision, category, collection, volume, title, subtitle, author. “To check” shows uncertain cases first.</p>
+<ul><li>The <b>category</b> has three proposals with a confidence percentage; above 70% it is almost always right (98.7% in our test).</li><li>Click a row to see the <b>cover and first pages</b>; × closes the panel.</li><li>Every change is saved automatically. Titles and authors you edit are never changed by the AI.</li><li>Select several rows to change decision or category together, or to exclude them with a reason.</li><li><b>Number the collection</b> assigns 01, 02… after the volumes already in the Library.</li></ul>
+<p>File names: <code>Category\Prefix - Title, subtitle - Author.pdf</code>; in collections <code>Category\Collection\Prefix - Collection 03, Title - Author.pdf</code>. Taken names get “(otra copia)”; names that are too long lose the subtitle first, then get shortened.</p>
+<h3>6. Simulation</h3><p>“Build the plan” shows errors, warnings and the plan in Excel (before → after). “Start the simulation” checks everything without touching anything.</p>
+<h3>7. Run and verify</h3><p>Possible only after a simulation without problems and ticking “I have checked the plan and I approve it”. Afterwards every file is verified by fingerprint.</p>
+<h2 id="en-4">4. Artificial intelligence (optional)</h2>
+<p>Without AI the program gets about one title in three right; with AI almost four in five. The AI receives only the file name, metadata and first pages, never the whole book. You can always correct by hand.</p>
+<table><tr><th>Choice</th><th>Cost</th><th>Account</th><th>Internet</th><th>Speed</th></tr><tr><td><b>AI on this PC</b></td><td>free</td><td>no</td><td>only to download the model</td><td>5–20 s per book</td></tr><tr><td><b>Google Gemini</b></td><td>free (daily limit)</td><td>Google, no card</td><td>yes</td><td>about 7 s per book</td></tr><tr><td><b>Groq</b></td><td>free (daily limit)</td><td>yes, no card</td><td>yes</td><td>a few seconds</td></tr><tr><td><b>Claude</b></td><td>paid (estimate shown first)</td><td>Anthropic, with credit</td><td>yes</td><td>a few seconds</td></tr></table>
+<h3>AI on this PC</h3><ol><li>Choose “AI on this PC”. The recommended model is <b>4B</b> (2.6 GB) with at least 8 GB of memory, otherwise <b>2B</b> (1.2 GB).</li><li>Press <b>Download</b>; an interrupted download resumes.</li><li>Without internet: copy the model file from another PC with a USB stick and use <b>Load from a file</b>. Models are stored in <code>%LOCALAPPDATA%\Biblioteca\modelli</code>.</li><li>Press <b>Test</b>, then <b>Run the AI on titles</b>.</li></ol>
+<h3>Google Gemini (free)</h3><ol><li>Press <b>Open the page</b> (aistudio.google.com).</li><li>Sign in with a Google account.</li><li>Accept the terms the first time.</li><li>Press <b>Create API key</b>.</li><li>Copy the key (<code>AQ.</code> or <code>AIza</code>…) and paste it; surrounding text is fine.</li><li>Press <b>Save the key</b> and <b>Test</b>.</li></ol>
+<p>When the daily free limit runs out, the program stops; press “Run” again the next day and it resumes. On the free tier Google may use the texts sent to improve its services.</p>
+<h3>Groq (free)</h3><ol><li>Open console.groq.com/keys and sign in.</li><li>Press <b>Create API Key</b> and copy it (<code>gsk_…</code>).</li><li>Paste, save and test.</li></ol>
+<h3>Claude (paid)</h3><ol><li>Open console.anthropic.com and sign in.</li><li>Add a small credit in <b>Billing</b>.</li><li>Create a key in <b>API keys</b> (<code>sk-ant-…</code>), paste, save and test.</li><li>Choose <b>claude-opus-5-5</b> (most accurate) or <b>claude-haiku-5-5</b> (much cheaper). The estimated cost is shown before starting.</li></ol>
+<p>All keys are stored <b>encrypted by Windows</b>: only your user on this PC can read them.</p>
+<h2 id="en-5">5. Adding new books</h2><ol><li>Copy the new books into a folder and wait until copying is finished.</li><li>Add that folder to the folders to organize.</li><li>Repeat the steps from the inventory. Books already in the Library are recognized and stay in the new-books folder.</li><li>Update catalog and Excel.</li></ol>
+<h2 id="en-6">6. Undoing a run</h2><p>On <b>Undo a run</b>: <b>Test</b> tells how many files can be put back; <b>Undo for real</b> puts them back in reverse order. Occupied places are skipped and reported. Empty folders are not deleted.</p>
+<h2 id="en-7">7. Catalog and Excel</h2><ul><li><b>Update the catalog</b> creates <code>Catalogo.html</code> in the Library: offline, also on phones; search, themes, ISBN with barcode, prologue, “My section”, three languages, built-in guide.</li><li><b>Book list with ISBN and barcodes</b> creates <code>Elenco_libri_ISBN.xlsx</code> with a verified EAN-13 barcode for every book with an ISBN.</li><li><b>Summary of things to decide</b>: probable duplicates, similar titles, missing authors, books without text.</li></ul>
+<h2 id="en-8">8. Settings</h2><ul><li><b>Appearance</b>; <b>confidence</b> threshold for categories; <b>categories</b> (folder, prefix, description); <b>exclusion reasons</b>.</li></ul><p>Working data (cache, proposals, logs, Excel) is in the <code>_programma</code> folder inside the Library: back it up with the books, the logs are needed to undo.</p>
+<h2 id="en-9">9. FAQ</h2><p><b>.azw3 files are not imported.</b> They are Kindle books that need Calibre: convert them to EPUB and add them again.</p><p><b>A PDF is “damaged”.</b> It stays where it is and is reported.</p><p><b>The AI on this PC is slow.</b> Use the 2B model, or free Gemini.</p>
+<h2 id="en-10">10. Privacy and licenses</h2><p>Nothing is sent over the internet except when you choose a cloud AI (Gemini, Groq, Claude): then the file name, metadata and first pages of the books to import are sent. The AI on this PC works offline. Only free-license libraries are used; see <code>LICENZE.txt</code> in the program folder.</p>
+</div>
+
+<!-- ======================================================== ESPAÑOL -->
+<div data-lang="es">
+<h2>Manual</h2>
+<p>Biblioteca ordena una colección de libros digitales (PDF, EPUB, MOBI) en categorías y colecciones con nombres uniformes, encuentra los duplicados sin borrar nunca nada y crea un <b>catálogo</b> que funciona sin internet y una <b>lista Excel</b> con ISBN y códigos de barras.</p>
+<nav class="indice"><a href="#es-1">1. Reglas de seguridad</a><a href="#es-2">2. Instalación</a><a href="#es-3">3. El primer ordenamiento, paso a paso</a><a href="#es-4">4. La inteligencia artificial (opcional)</a><a href="#es-5">5. Añadir libros nuevos</a><a href="#es-6">6. Deshacer una ejecución</a><a href="#es-7">7. Catálogo y Excel</a><a href="#es-8">8. Ajustes</a><a href="#es-9">9. Preguntas frecuentes</a><a href="#es-10">10. Privacidad y licencias</a></nav>
+<h2 id="es-1">1. Reglas de seguridad</h2>
+<div class="box"><ul><li>El programa <b>nunca borra ningún archivo</b> y <b>nunca sobrescribe</b>: solo mueve y renombra.</li><li>Las <b>carpetas protegidas</b> nunca se leen, escriben ni tocan.</li>
+<li>Siempre: <b>inventario → propuestas → plan → simulación → tu aprobación → ejecución → verificación</b>.</li><li>Cada ejecución escribe un <b>registro</b> que permite devolverlo todo a su sitio.</li>
+<li>Antes de cada movimiento se comprueba que el archivo no haya cambiado (SHA-256), que el destino esté libre y que la ruta no pase de 250 caracteres. Si una comprobación falla, no se mueve nada.</li></ul></div>
+<p>Aun así se recomienda una copia de seguridad de los libros antes del primer ordenamiento.</p>
+<h2 id="es-2">2. Instalación</h2><p>Ejecuta <code>Biblioteca-Setup.exe</code>. El programa se instala en <code>Archivos de programa\Biblioteca</code> con acceso directo en el menú Inicio. Requiere Windows 10 u 11 (64 bits). Si Windows muestra «Windows protegió su PC», pulsa <b>Más información → Ejecutar de todas formas</b>.</p>
+<p><b>Desinstalar</b> quita solo el programa: <b>tus libros, la Biblioteca, el catálogo y los registros no se tocan</b>.</p>
+<h2 id="es-3">3. El primer ordenamiento, paso a paso</h2>
+<h3>1. Carpetas</h3><ul><li><b>Biblioteca</b>: donde irán los libros ordenados (vacía o ya ordenada).</li><li><b>Carpetas para ordenar</b>: una o más carpetas con libros desordenados.</li><li><b>Carpetas protegidas</b>: por ejemplo las copias de seguridad; nunca se abren.</li><li>Las copias idénticas y los archivos que no son libros van a <code>_duplicati</code> y <code>_altri_file</code>, junto a la Biblioteca.</li></ul>
+<h3>2. Inventario</h3><p>Lee cada archivo (huella, páginas, primeras páginas, ISBN, edición, prólogo, idioma) sin mover nada. Unos 8 minutos para 3600 libros; se puede interrumpir y reanudar. Se crea un Excel del inventario.</p>
+<h3>3. Duplicados</h3><ul><li><b>Copias idénticas</b>: se conserva una, las demás van a <code>_duplicati</code>.</li><li><b>Ya en la Biblioteca</b>: mismo archivo, o mismo ISBN con título parecido; se quedan donde están.</li><li><b>Probables duplicados</b> y <b>títulos parecidos</b>: solo se señalan, decides tú.</li></ul>
+<h3>4. Títulos con IA (opcional)</h3><p>Ver el capítulo 4.</p>
+<h3>5. Propuestas</h3><p>Un libro por fila: decisión, categoría, colección, volumen, título, subtítulo, autor. «Para revisar» muestra primero los casos dudosos.</p>
+<ul><li>La <b>categoría</b> tiene tres propuestas con su porcentaje de confianza; por encima del 70% casi siempre es correcta (98,7% en la prueba).</li><li>Haz clic en una fila para ver la <b>portada y las primeras páginas</b>; la × cierra el panel.</li><li>Cada cambio se guarda solo. La IA no cambia los títulos y autores corregidos a mano.</li><li>Selecciona varias filas para cambiar juntas la decisión o la categoría, o para excluirlas con un motivo.</li><li><b>Numerar la colección</b> asigna 01, 02… después de los volúmenes que ya están en la Biblioteca.</li></ul>
+<p>Nombres: <code>Categoría\Prefijo - Título, subtítulo - Autor.pdf</code>; en las colecciones <code>Categoría\Colección\Prefijo - Colección 03, Título - Autor.pdf</code>. Si el nombre ya existe se añade «(otra copia)»; un nombre demasiado largo pierde primero el subtítulo y luego se acorta.</p>
+<h3>6. Simulación</h3><p>«Construir el plan» muestra errores, avisos y el plan en Excel (antes → después). «Iniciar la simulación» lo comprueba todo sin tocar nada.</p>
+<h3>7. Ejecución y verificación</h3><p>Solo es posible después de una simulación sin problemas y de marcar «He revisado el plan y lo apruebo». Al final se verifica cada archivo por su huella.</p>
+<h2 id="es-4">4. La inteligencia artificial (opcional)</h2>
+<p>Sin IA el programa acierta más o menos uno de cada tres títulos; con IA casi cuatro de cada cinco. La IA recibe solo el nombre del archivo, los metadatos y las primeras páginas, nunca el libro entero. Siempre puedes corregir a mano.</p>
+<table><tr><th>Opción</th><th>Coste</th><th>Cuenta</th><th>Internet</th><th>Velocidad</th></tr><tr><td><b>IA en el PC</b></td><td>gratis</td><td>no</td><td>solo para descargar el modelo</td><td>5–20 s por libro</td></tr><tr><td><b>Google Gemini</b></td><td>gratis (límite diario)</td><td>Google, sin tarjeta</td><td>sí</td><td>unos 7 s por libro</td></tr><tr><td><b>Groq</b></td><td>gratis (límite diario)</td><td>sí, sin tarjeta</td><td>sí</td><td>pocos segundos</td></tr><tr><td><b>Claude</b></td><td>de pago (se muestra el coste antes)</td><td>Anthropic, con crédito</td><td>sí</td><td>pocos segundos</td></tr></table>
+<h3>IA en el PC</h3><ol><li>Elige «IA en el PC». El modelo recomendado es <b>4B</b> (2,6 GB) con al menos 8 GB de memoria; si no, <b>2B</b> (1,2 GB).</li><li>Pulsa <b>Descargar</b>; si la descarga se interrumpe, se reanuda.</li><li>Sin internet: copia el archivo del modelo desde otro PC con una memoria USB y usa <b>Cargar desde un archivo</b>. Los modelos están en <code>%LOCALAPPDATA%\Biblioteca\modelli</code>.</li><li>Pulsa <b>Probar</b> y luego <b>Iniciar la IA en los títulos</b>.</li></ol>
+<h3>Google Gemini (gratis)</h3><ol><li>Pulsa <b>Abrir la página</b> (aistudio.google.com).</li><li>Entra con tu cuenta de Google (Gmail o teléfono Android).</li><li>La primera vez acepta las condiciones.</li><li>Pulsa <b>Create API key</b>.</li><li>Copia la clave (<code>AQ.</code> o <code>AIza</code>…) y pégala; no importa si copias texto alrededor.</li><li>Pulsa <b>Guardar la clave</b> y <b>Probar</b>.</li></ol>
+<p>Cuando se acaba el límite gratuito del día, el programa se detiene; al día siguiente pulsa de nuevo «Iniciar» y sigue donde lo dejó. En el nivel gratuito Google puede usar los textos enviados para mejorar sus servicios.</p>
+<h3>Groq (gratis)</h3><ol><li>Abre console.groq.com/keys y entra.</li><li>Pulsa <b>Create API Key</b> y copia la clave (<code>gsk_…</code>).</li><li>Pégala, guárdala y prueba.</li></ol>
+<h3>Claude (de pago)</h3><ol><li>Abre console.anthropic.com y entra.</li><li>Añade un pequeño crédito en <b>Billing</b>.</li><li>Crea una clave en <b>API keys</b> (<code>sk-ant-…</code>), pégala, guárdala y prueba.</li><li>Elige <b>claude-opus-5-5</b> (la más precisa) o <b>claude-haiku-5-5</b> (mucho más económica). Antes de empezar se muestra el coste estimado.</li></ol>
+<p>Las claves se guardan <b>cifradas por Windows</b>: solo tu usuario en este PC puede leerlas.</p>
+<h2 id="es-5">5. Añadir libros nuevos</h2><ol><li>Copia los libros nuevos en una carpeta y espera a que termine la copia.</li><li>Añade esa carpeta a las carpetas para ordenar.</li><li>Repite los pasos desde el inventario. Los libros que ya están en la Biblioteca se reconocen y se quedan en la carpeta de los nuevos.</li><li>Actualiza el catálogo y el Excel.</li></ol>
+<h2 id="es-6">6. Deshacer una ejecución</h2><p>En <b>Deshacer una ejecución</b>: <b>Probar</b> indica cuántos archivos se pueden devolver; <b>Deshacer de verdad</b> los devuelve en orden inverso. Los sitios ocupados se saltan y se señalan. Las carpetas vacías no se borran.</p>
+<h2 id="es-7">7. Catálogo y Excel</h2><ul><li><b>Actualizar el catálogo</b> crea <code>Catalogo.html</code> en la Biblioteca: funciona sin internet, también en el teléfono; búsqueda, temas, ISBN con código de barras, prólogo, «Mi sección», tres idiomas, guía integrada.</li><li><b>Lista de libros con ISBN y códigos de barras</b> crea <code>Elenco_libri_ISBN.xlsx</code> con un código EAN-13 verificado para cada libro con ISBN.</li><li><b>Resumen de lo que hay que decidir</b>: probables duplicados, títulos parecidos, autores que faltan, libros sin texto.</li></ul>
+<h2 id="es-8">8. Ajustes</h2><ul><li><b>Aspecto</b>; umbral de <b>confianza</b> de las categorías; <b>categorías</b> (carpeta, prefijo, descripción); <b>motivos de exclusión</b>.</li></ul><p>Los datos de trabajo (caché, propuestas, registros, Excel) están en la carpeta <code>_programma</code> dentro de la Biblioteca: guárdala con los libros en las copias de seguridad, los registros sirven para deshacer.</p>
+<h2 id="es-9">9. Preguntas frecuentes</h2><p><b>Los archivos .azw3 no se importan.</b> Son libros Kindle que necesitan Calibre: conviértelos a EPUB y añádelos de nuevo.</p><p><b>Un PDF está «dañado».</b> Se queda donde está y se señala.</p><p><b>La IA en el PC es lenta.</b> Usa el modelo 2B, o Gemini gratis.</p>
+<h2 id="es-10">10. Privacidad y licencias</h2><p>No se envía nada por internet, salvo cuando eliges una IA en la nube (Gemini, Groq, Claude): entonces se envían el nombre del archivo, los metadatos y las primeras páginas de los libros para importar. La IA en el PC funciona sin internet. Solo se usan bibliotecas con licencia libre; ver <code>LICENZE.txt</code> en la carpeta del programa.</p>
+</div>
+
+</main>
+<script>
+const langs = ["it", "en", "es"];
+function scegli(l) {
+  document.querySelectorAll("[data-lang]").forEach(d => d.classList.toggle("on", d.dataset.lang === l));
+  document.querySelectorAll("header button").forEach(b => b.classList.toggle("on", b.dataset.l === l));
+  document.documentElement.lang = l;
+}
+document.querySelectorAll("header button").forEach(b => b.onclick = () => scegli(b.dataset.l));
+const q = (location.hash.match(/lang=(\w\w)/) || [])[1] || (navigator.language || "it").slice(0, 2);
+scegli(langs.includes(q) ? q : "en");
+</script>
+</body>
+</html>
